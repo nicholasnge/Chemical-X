@@ -1,26 +1,26 @@
 package com.example.chemicalx.fragments;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.core.content.res.TypedArrayUtils;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.chemicalx.MainActivity;
-import com.example.chemicalx.OrderStatus;
 import com.example.chemicalx.R;
-import com.example.chemicalx.TimeLineModel;
-
+import com.example.chemicalx.fragments.OrderStatus;
 import java.util.ArrayList;
 
 
 public class OneFragment extends Fragment {
-    private ArrayList<TimeLineModel> mDataList;
+    private ArrayList<TimeLineModel> mDataList = new ArrayList<>();
     private TimeLineAdapter mAdapter;
     private LinearLayoutManager mLayoutManager;
+    RecyclerView recyclerView;
 
     public OneFragment() {
         // Required empty public constructor
@@ -29,17 +29,24 @@ public class OneFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setDataListItems();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_one, container, false);
+        View view = inflater.inflate(R.layout.activity_example, container, false);
+        if (view == null){
+            Log.d("TAG", "VIEW IS NULL");
+        }
+        recyclerView = view.findViewById(R.id.recyclerView);
+        setDataListItems();
+        initRecyclerView();
+        return view;
     }
 
     private void setDataListItems() {
+        mDataList.clear();
         mDataList.add(new TimeLineModel("Item successfully delivered", "", OrderStatus.INACTIVE));
         mDataList.add(new TimeLineModel("Courier is out to delivery your order", "2017-02-12 08:00", OrderStatus.ACTIVE));
         mDataList.add(new TimeLineModel("Item has reached courier facility at New Delhi", "2017-02-11 21:00", OrderStatus.COMPLETED));
@@ -52,7 +59,8 @@ public class OneFragment extends Fragment {
     }
     private void initRecyclerView() {
         mLayoutManager = new LinearLayoutManager(getContext(), RecyclerView.VERTICAL, false);
-        RecyclerView recyclerView = getActivity().findViewById(R.id.recyclerView);
+        Log.d("TAG", mLayoutManager.toString());
+        Log.d("TAG", recyclerView.toString());
         recyclerView.setLayoutManager(mLayoutManager);
         mAdapter = new TimeLineAdapter(mDataList);
         recyclerView.setAdapter(mAdapter);

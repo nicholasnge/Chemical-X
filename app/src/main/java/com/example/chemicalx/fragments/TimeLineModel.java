@@ -1,11 +1,13 @@
-package com.example.chemicalx;
+package com.example.chemicalx.fragments;
+
+import android.util.Log;
 
 public class TimeLineModel {
     String message;
     String date;
     OrderStatus status;
 
-    public TimeLineModel(String message, String date, OrderStatus status) {
+    public TimeLineModel (String message, String date, OrderStatus status) {
         this.message = message;
         this.date = date;
         this.status = status;

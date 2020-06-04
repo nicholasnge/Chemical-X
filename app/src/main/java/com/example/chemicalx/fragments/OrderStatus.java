@@ -1,4 +1,4 @@
-package com.example.chemicalx;
+package com.example.chemicalx.fragments;
 
 public enum OrderStatus {
     COMPLETED,
