@@ -1,7 +1,11 @@
 package com.example.chemicalx;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -19,6 +23,12 @@ import java.util.List;
 import com.example.chemicalx.R;
 import com.example.chemicalx.fragments.OneFragment;
 import com.example.chemicalx.fragments.TwoFragment;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.tabs.TabLayout;
 
@@ -27,6 +37,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private Toolbar toolbar;
     private TabLayout tabLayout;
     private ViewPager viewPager;
+    private GoogleSignInClient googleSignInClient;
 
     NavigationView navView;
     DrawerLayout drawerLayout;
@@ -56,6 +67,31 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         toggle.syncState();
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        // SETTING UP GOOGLE ACCOUNT
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestEmail()
+                .build();
+        googleSignInClient = GoogleSignIn.getClient(this, gso);
+
+        GoogleSignInAccount acct = GoogleSignIn.getLastSignedInAccount(this);
+        if (acct != null) {
+            String personName = acct.getDisplayName();
+            String personEmail = acct.getEmail();
+            // String personGivenName = acct.getGivenName();
+            // String personFamilyName = acct.getFamilyName();
+            // String personId = acct.getId();
+            // Uri personPhoto = acct.getPhotoUrl();
+            TextView userDisplay = navView.getHeaderView(0).findViewById(R.id.userDisplay);
+            TextView userContactDisplay = navView.getHeaderView(0).findViewById(R.id.userContactDisplay);
+            userDisplay.setText(personName);
+            userContactDisplay.setText(personEmail);
+        }
+    }
+
     private void setupViewPager(ViewPager viewPager) {
         ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
         adapter.addFragment(new OneFragment(), "ONE");
@@ -64,8 +100,28 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     @Override
-    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+    public boolean onNavigationItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        switch (id){
+            case R.id.logOut:
+                signOut();
+                break;
+            default:
+        }
+
         return false;
+    }
+
+    private void signOut() {
+        googleSignInClient.signOut()
+                .addOnCompleteListener(this, new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        Intent logoutIntent = new Intent(MainActivity.this, LoginActivity.class);
+                        startActivity(logoutIntent);
+                    }
+                });
     }
 
     class ViewPagerAdapter extends FragmentPagerAdapter {
