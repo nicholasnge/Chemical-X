@@ -72,21 +72,22 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onStart();
 
         // SETTING UP GOOGLE ACCOUNT
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+        GoogleSignInOptions gso = new GoogleSignInOptions
+                .Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestEmail()
                 .build();
         googleSignInClient = GoogleSignIn.getClient(this, gso);
-
         GoogleSignInAccount acct = GoogleSignIn.getLastSignedInAccount(this);
+
         if (acct != null) {
             String personName = acct.getDisplayName();
             String personEmail = acct.getEmail();
-            // String personGivenName = acct.getGivenName();
-            // String personFamilyName = acct.getFamilyName();
-            // String personId = acct.getId();
-            // Uri personPhoto = acct.getPhotoUrl();
-            TextView userDisplay = navView.getHeaderView(0).findViewById(R.id.userDisplay);
-            TextView userContactDisplay = navView.getHeaderView(0).findViewById(R.id.userContactDisplay);
+            TextView userDisplay = navView
+                    .getHeaderView(0)
+                    .findViewById(R.id.userDisplay);
+            TextView userContactDisplay = navView
+                    .getHeaderView(0)
+                    .findViewById(R.id.userContactDisplay);
             userDisplay.setText(personName);
             userContactDisplay.setText(personEmail);
         }
@@ -118,7 +119,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 .addOnCompleteListener(this, new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
-                        Intent logoutIntent = new Intent(MainActivity.this, LoginActivity.class);
+                        Intent logoutIntent = new Intent(MainActivity.this,
+                                LoginActivity.class);
                         startActivity(logoutIntent);
                     }
                 });
