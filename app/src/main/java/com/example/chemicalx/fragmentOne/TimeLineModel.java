@@ -1,6 +1,4 @@
-package com.example.chemicalx.fragments;
-
-import android.util.Log;
+package com.example.chemicalx.fragmentOne;
 
 public class TimeLineModel {
     String message;

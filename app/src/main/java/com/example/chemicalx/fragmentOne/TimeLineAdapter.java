@@ -1,4 +1,4 @@
-package com.example.chemicalx.fragments;
+package com.example.chemicalx.fragmentOne;
 
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -37,7 +37,6 @@ class TimeLineAdapter extends RecyclerView.Adapter<TimeLineAdapter.TimeLineViewH
         if(mLayoutInflater == null) {
             mLayoutInflater = LayoutInflater.from(parent.getContext());
         }
-        Log.d("TAG","456");
         return new TimeLineViewHolder(mLayoutInflater.inflate(R.layout.item_timeline, parent, false), viewType);
     }
 
@@ -68,7 +67,6 @@ class TimeLineAdapter extends RecyclerView.Adapter<TimeLineAdapter.TimeLineViewH
     }
 
     private void setMarker(TimeLineViewHolder holder, int drawableRestId, int colorFilter){
-        Log.d("TAG","123");
         holder.timeline.setMarker(VectorDrawableUtils.INSTANCE.getDrawable(holder.itemView.getContext(), drawableRestId, ContextCompat.getColor(holder.itemView.getContext(), colorFilter)));
     }
 

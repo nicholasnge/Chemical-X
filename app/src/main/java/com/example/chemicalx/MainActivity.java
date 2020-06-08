@@ -1,8 +1,13 @@
 package com.example.chemicalx;
 
+import android.app.AppOpsManager;
+import android.app.usage.UsageStats;
+import android.app.usage.UsageStatsManager;
+import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
+import android.icu.util.Calendar;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.MenuItem;
 import android.widget.TextView;
@@ -20,9 +25,8 @@ import androidx.viewpager.widget.ViewPager;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.example.chemicalx.R;
-import com.example.chemicalx.fragments.OneFragment;
-import com.example.chemicalx.fragments.TwoFragment;
+import com.example.chemicalx.fragmentOne.OneFragment;
+import com.example.chemicalx.fragmentTwo.TwoFragment;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -33,7 +37,7 @@ import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.tabs.TabLayout;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
-
+    public static final int APPUSAGE_REQUEST_CODE = 1;
     private Toolbar toolbar;
     private TabLayout tabLayout;
     private ViewPager viewPager;
@@ -46,18 +50,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // set view to activity main
         setContentView(R.layout.activity_main);
 
+        //mount toolbar
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        //SETTING UP VIEWPAGER AND TABS
+        //set up tabs (fragments one two)
         viewPager = (ViewPager) findViewById(R.id.viewpager);
         setupViewPager(viewPager);
         tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(viewPager);
 
-        //SETTING UP NAV DRAWER
+        //set up navigation drawer
         drawerLayout = findViewById(R.id.drawer);
         navView = findViewById(R.id.design_navigation_view);
         navView.setNavigationItemSelectedListener(this);
@@ -65,6 +71,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         drawerLayout.addDrawerListener(toggle);
         getSupportActionBar().setHomeButtonEnabled(true);
         toggle.syncState();
+
+        //check if theres permission to pull app usage stats
+        AppOpsManager appOps = (AppOpsManager)
+                getSystemService(Context.APP_OPS_SERVICE);
+        int mode = appOps.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS,
+                android.os.Process.myUid(), getPackageName());
+        if (mode != AppOpsManager.MODE_ALLOWED){
+            startActivityForResult(new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS), APPUSAGE_REQUEST_CODE);
+        }
+
+
     }
 
     @Override

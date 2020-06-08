@@ -1,4 +1,4 @@
-package com.example.chemicalx.fragments;
+package com.example.chemicalx.fragmentOne;
 
 import android.os.Bundle;
 import android.util.Log;
@@ -58,8 +58,6 @@ public class OneFragment extends Fragment {
     }
     private void initRecyclerView() {
         mLayoutManager = new LinearLayoutManager(getContext(), RecyclerView.VERTICAL, false);
-        Log.d("TAG", mLayoutManager.toString());
-        Log.d("TAG", recyclerView.toString());
         recyclerView.setLayoutManager(mLayoutManager);
         mAdapter = new TimeLineAdapter(mDataList);
         recyclerView.setAdapter(mAdapter);
