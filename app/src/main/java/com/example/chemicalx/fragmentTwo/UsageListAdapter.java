@@ -37,7 +37,7 @@ import com.example.chemicalx.R;
  */
 public class UsageListAdapter extends RecyclerView.Adapter<UsageListAdapter.ViewHolder> {
 
-    private List<CustomUsageStats> mCustomUsageStatsList = new ArrayList<>();
+    private List<AppUsageInfo> AppUsageInfoList = new ArrayList<>();
     private DateFormat mDateFormat = new SimpleDateFormat();
 
     /**
@@ -81,18 +81,17 @@ public class UsageListAdapter extends RecyclerView.Adapter<UsageListAdapter.View
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, final int position) {
         viewHolder.getPackageName().setText(
-                mCustomUsageStatsList.get(position).usageStats.getPackageName());
-        long lastTimeUsed = mCustomUsageStatsList.get(position).usageStats.getLastTimeUsed();
-        viewHolder.getMinutesUsed().setText(Long.toString(mCustomUsageStatsList.get(position).usageStats.getTotalTimeInForeground()/60000));
-        viewHolder.getAppIcon().setImageDrawable(mCustomUsageStatsList.get(position).appIcon);
+                AppUsageInfoList.get(position).packageName);
+        viewHolder.getMinutesUsed().setText(Long.toString(AppUsageInfoList.get(position).timeInForeground/60000));
+        viewHolder.getAppIcon().setImageDrawable(AppUsageInfoList.get(position).appIcon);
     }
 
     @Override
     public int getItemCount() {
-        return mCustomUsageStatsList.size();
+        return AppUsageInfoList.size();
     }
 
-    public void setCustomUsageStatsList(List<CustomUsageStats> customUsageStats) {
-        mCustomUsageStatsList = customUsageStats;
+    public void setCustomUsageStatsList(List<AppUsageInfo> AppUsageInfoList) {
+        this.AppUsageInfoList = AppUsageInfoList;
     }
 }
