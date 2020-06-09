@@ -46,13 +46,13 @@ class TimeLineAdapter extends RecyclerView.Adapter<TimeLineAdapter.TimeLineViewH
 
         switch(timeLineModel.getStatus()){
             case INACTIVE:
-                setMarker(holder, R.drawable.ic_marker_inactive, R.color.colorGrey500);
+                setMarker(holder, R.drawable.ic_marker_inactive, R.color.Grey);
                 break;
             case ACTIVE:
-                setMarker(holder, R.drawable.ic_marker_active, R.color.colorGrey500);
+                setMarker(holder, R.drawable.ic_marker_active, R.color.DarkGrey);
                 break;
             default:
-                setMarker(holder, R.drawable.ic_marker, R.color.colorGrey500);
+                setMarker(holder, R.drawable.ic_marker, R.color.Grey);
         }
 
         if(!timeLineModel.getDate().isEmpty()){
