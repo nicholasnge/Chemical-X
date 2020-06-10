@@ -54,9 +54,16 @@ public class Fragment_Schedule extends Fragment {
         mDataList.add(new TimeLineModel("UTW1702B Recitation", "8:00 PM", OrderStatus.ACTIVE));
         mDataList.add(new TimeLineModel("Work - Recreation remaining: 90 min", "9:30 PM", OrderStatus.INACTIVE));
         mDataList.add(new TimeLineModel("Sleep - Overdue by: 0 min", "12:30 AM", OrderStatus.INACTIVE));
+        mDataList.add(new TimeLineModel("Work - Recreation remaining: 90 min", "9:30 PM", OrderStatus.INACTIVE));
+        mDataList.add(new TimeLineModel("Sleep - Overdue by: 0 min", "12:30 AM", OrderStatus.INACTIVE));
     }
     private void initRecyclerView() {
-        mLayoutManager = new LinearLayoutManager(getContext(), RecyclerView.VERTICAL, false);
+        mLayoutManager = new LinearLayoutManager(getActivity()) {
+            @Override
+            public boolean canScrollVertically() {
+                return false;
+            }
+        };
         recyclerView.setLayoutManager(mLayoutManager);
         mAdapter = new TimeLineAdapter(mDataList);
         recyclerView.setAdapter(mAdapter);

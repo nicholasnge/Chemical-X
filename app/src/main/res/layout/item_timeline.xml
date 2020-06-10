@@ -21,11 +21,11 @@
     <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="15dp"
-        android:layout_marginBottom="15dp"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="5dp"
         android:layout_gravity="center_vertical"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="15dp"
+        android:layout_marginRight="5dp"
+        android:layout_marginBottom="15dp"
         app:cardBackgroundColor="@color/colorGrey50"
         app:contentPadding="15dp">
 
@@ -44,12 +44,12 @@
                 tools:text="24 JAN" />
 
             <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_timeline_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="5dp"
-                android:id="@+id/text_timeline_title"
                 android:textColor="@android:color/black"
-                tools:text="Order Successfully Completed"/>
+                tools:text="Order Successfully Completed" />
 
         </LinearLayout>
 

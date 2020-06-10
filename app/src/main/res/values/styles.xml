@@ -8,12 +8,12 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
-    <style name="AppTheme.NoActionBar">
-        <item name="windowActionBar">false</item>
-        <item name="windowNoTitle">true</item>
+    <style name="MyMaterialTheme" parent="MyMaterialTheme.Base">
+        <item name="android:actionMenuTextColor">@color/colorBlack</item>
     </style>
 
-    <style name="MyMaterialTheme" parent="MyMaterialTheme.Base">
+    <style name="ToolbarTheme" parent="ThemeOverlay.MaterialComponents.Dark.ActionBar">
+        <item name="actionMenuTextColor">@color/colorBlack</item>
     </style>
 
     <style name="MyMaterialTheme.Base" parent="Theme.MaterialComponents.Light.DarkActionBar">

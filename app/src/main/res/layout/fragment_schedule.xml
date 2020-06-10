@@ -1,36 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <LinearLayout
-        android:id="@+id/linearLayout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:orientation="vertical">
 
         <TextView
             android:id="@+id/textView5"
             style="@style/TextAppearance.AppCompat.Title"
             android:layout_width="match_parent"
-            android:layout_height="50dp"
+            android:layout_height="wrap_content"
             android:padding="12dp"
             android:text="9th June, Tuesday"
-            android:textAppearance="@style/TextAppearance.AppCompat.Display1"/>
+            android:textAppearance="@style/TextAppearance.AppCompat.Display1" />
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerView"
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/colorWhite"
-            android:clipToPadding="false"
-            android:padding="12dp"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior"
-            tools:listitem="@layout/item_timeline" />
+            android:layout_height="wrap_content">
 
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentBottom="true"
+                android:layout_marginEnd="0dp"
+                android:layout_marginBottom="0dp"
+                android:background="@color/colorWhite"
+                android:clipToPadding="false"
+                android:padding="12dp"
+                app:layout_behavior="@string/appbar_scrolling_view_behavior"
+                tools:listitem="@layout/item_timeline" />
+        </RelativeLayout>
     </LinearLayout>
-
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+</androidx.core.widget.NestedScrollView>
