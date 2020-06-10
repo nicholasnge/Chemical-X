@@ -14,7 +14,7 @@
 * limitations under the License.
 */
 
-package com.example.chemicalx.fragmentTwo;
+package com.example.chemicalx.Fragment_Insights;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -27,7 +27,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import com.example.chemicalx.R;

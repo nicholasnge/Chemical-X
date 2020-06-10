@@ -1,4 +1,4 @@
-package com.example.chemicalx.fragmentOne;
+package com.example.chemicalx.Fragment_Schedule;
 
 public class TimeLineModel {
     String message;

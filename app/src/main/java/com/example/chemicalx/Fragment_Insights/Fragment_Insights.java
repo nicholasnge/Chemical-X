@@ -1,8 +1,6 @@
-package com.example.chemicalx.fragmentTwo;
+package com.example.chemicalx.Fragment_Insights;
 
-import android.app.AppOpsManager;
 import android.app.usage.UsageEvents;
-import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
 import android.content.Intent;
@@ -23,16 +21,14 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.chemicalx.R;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 
-public class TwoFragment extends Fragment {
-    private static final String TAG = TwoFragment.class.getSimpleName();
+public class Fragment_Insights extends Fragment {
+    private static final String TAG = Fragment_Insights.class.getSimpleName();
     private static final long minimumTime = 1000 * 60;
 
     UsageListAdapter mUsageListAdapter;
@@ -42,7 +38,7 @@ public class TwoFragment extends Fragment {
     RecyclerView.LayoutManager mLayoutManager;
     Button mOpenUsageSettingButton;
 
-    public TwoFragment() {
+    public Fragment_Insights() {
     }
 
     @Override
@@ -57,7 +53,7 @@ public class TwoFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_two, container, false);
+        return inflater.inflate(R.layout.fragment_insights, container, false);
     }
 
     @Override

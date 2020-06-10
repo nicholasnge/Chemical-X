@@ -1,4 +1,4 @@
-package com.example.chemicalx.fragmentTwo;
+package com.example.chemicalx.Fragment_Insights;
 
 import android.graphics.drawable.Drawable;
 

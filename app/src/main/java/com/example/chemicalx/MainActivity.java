@@ -1,14 +1,10 @@
 package com.example.chemicalx;
 
 import android.app.AppOpsManager;
-import android.app.usage.UsageStats;
-import android.app.usage.UsageStatsManager;
 import android.content.Context;
 import android.content.Intent;
-import android.icu.util.Calendar;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.util.Log;
 import android.view.MenuItem;
 import android.widget.TextView;
 
@@ -25,9 +21,9 @@ import androidx.viewpager.widget.ViewPager;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.example.chemicalx.fragmentOne.OneFragment;
-import com.example.chemicalx.fragmentThree.ThreeFragment;
-import com.example.chemicalx.fragmentTwo.TwoFragment;
+import com.example.chemicalx.Fragment_Schedule.Fragment_Schedule;
+import com.example.chemicalx.Fragment_Todolist.Fragment_Todolist;
+import com.example.chemicalx.Fragment_Insights.Fragment_Insights;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -113,9 +109,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void setupViewPager(ViewPager viewPager) {
         ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
-        adapter.addFragment(new OneFragment(), "SCHEDULE");
-        adapter.addFragment(new TwoFragment(), "APP USAGE");
-        adapter.addFragment(new ThreeFragment(), "INSIGHTS");
+        adapter.addFragment(new Fragment_Schedule(), "SCHEDULE");
+        adapter.addFragment(new Fragment_Insights(), "INSIGHTS");
+        adapter.addFragment(new Fragment_Todolist(), "TASKS");
         viewPager.setAdapter(adapter);
     }
 

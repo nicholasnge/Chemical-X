@@ -1,6 +1,5 @@
-package com.example.chemicalx.fragmentOne;
+package com.example.chemicalx.Fragment_Schedule;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;

@@ -1,4 +1,4 @@
-package com.example.chemicalx.fragmentOne;
+package com.example.chemicalx.Fragment_Schedule;
 
 import android.os.Bundle;
 import android.util.Log;
@@ -15,13 +15,13 @@ import com.example.chemicalx.R;
 import java.util.ArrayList;
 
 
-public class OneFragment extends Fragment {
+public class Fragment_Schedule extends Fragment {
     private ArrayList<TimeLineModel> mDataList = new ArrayList<>();
     private TimeLineAdapter mAdapter;
     private LinearLayoutManager mLayoutManager;
     RecyclerView recyclerView;
 
-    public OneFragment() {
+    public Fragment_Schedule() {
         // Required empty public constructor
     }
 
@@ -34,7 +34,7 @@ public class OneFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_one, container, false);
+        View view = inflater.inflate(R.layout.fragment_schedule, container, false);
         if (view == null){
             Log.d("TAG", "VIEW IS NULL");
         }
