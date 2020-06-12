@@ -45,6 +45,9 @@ dependencies {
 
     // To access google accounts.
     implementation 'com.google.android.gms:play-services-auth:18.0.0'
+
+    // For MPAndroidChart
+    implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
 }
 repositories {
     mavenCentral()

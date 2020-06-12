@@ -5,22 +5,36 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <Button android:id="@+id/button_open_usage_setting"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/open_app_usage_setting"
-        android:visibility="gone"
-        />
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerview_app_usage"
-        android:layout_marginLeft="@dimen/margin_small"
-        android:layout_marginRight="@dimen/margin_small"
-        android:scrollbars="vertical"
-        android:drawSelectorOnTop="true"
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layoutManager="LinearLayoutManager"
-        />
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <androidx.viewpager.widget.ViewPager
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+            <Button
+                android:id="@+id/button_open_usage_setting"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/open_app_usage_setting"
+                android:visibility="gone" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerview_app_usage"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="@dimen/margin_small"
+                android:layout_marginRight="@dimen/margin_small"
+                android:drawSelectorOnTop="true"
+                android:scrollbars="vertical"
+                app:layoutManager="LinearLayoutManager" />
+        </LinearLayout>
+    </ScrollView>
 
 </LinearLayout>

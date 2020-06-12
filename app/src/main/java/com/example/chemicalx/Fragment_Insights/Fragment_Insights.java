@@ -4,6 +4,7 @@ import android.app.usage.UsageEvents;
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.icu.util.Calendar;
@@ -71,6 +72,7 @@ public class Fragment_Insights extends Fragment {
     }
 
     private void getUsageStats() {
+        PackageManager packageManager = getActivity().getPackageManager();
         Calendar cal = Calendar.getInstance();
         cal.add(Calendar.DAY_OF_MONTH, -1);
         long end = cal.getTimeInMillis();
@@ -83,8 +85,7 @@ public class Fragment_Insights extends Fragment {
             AppUsageInfo appUsageInfo = hm.get(key);
             // try finding the app icon
             try {
-                Drawable appIcon = getActivity().getPackageManager()
-                        .getApplicationIcon(key);
+                Drawable appIcon = packageManager.getApplicationIcon(key);
                 appUsageInfo.appIcon = appIcon;
             } catch (PackageManager.NameNotFoundException e) {
                 Log.w(TAG, String.format("App Icon is not found for %s",
@@ -92,6 +93,16 @@ public class Fragment_Insights extends Fragment {
                 appUsageInfo.appIcon = getActivity()
                         .getDrawable(R.drawable.iu);
             }
+
+            try {
+                ApplicationInfo appInfo = packageManager.getApplicationInfo(key, 0);
+                appUsageInfo.name = packageManager.getApplicationLabel(appInfo).toString();
+            } catch (PackageManager.NameNotFoundException e) {
+                Log.w(TAG, String.format("App Name is not found for %s",
+                        key));
+                appUsageInfo.name = key;
+            }
+
             // add packageName to AppUsageInfo
             appUsageInfo.packageName = key;
 
