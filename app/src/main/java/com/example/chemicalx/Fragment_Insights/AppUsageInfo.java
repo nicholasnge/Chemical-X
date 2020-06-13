@@ -7,6 +7,7 @@ public class AppUsageInfo {
     public String packageName;
     public long timeInForeground;
     public int launchCount;
+    public int category;
     public Drawable appIcon;
 
     AppUsageInfo() {

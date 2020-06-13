@@ -28,6 +28,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import com.example.chemicalx.R;
@@ -81,10 +82,8 @@ public class UsageListAdapter extends RecyclerView.Adapter<UsageListAdapter.View
             // make legend invisible
             usageBar.getLegend().setEnabled(false);
 
-            // blank description
-            Description desc = new Description();
-            desc.setText("");
-            usageBar.setDescription(desc);
+            // make description invisible
+            usageBar.getDescription().setEnabled(false);
 
             // disable all possible touch-interactions
             usageBar.setTouchEnabled(false);
@@ -112,6 +111,9 @@ public class UsageListAdapter extends RecyclerView.Adapter<UsageListAdapter.View
 
             // set the data
             usageBar.setData(barData);
+
+            // refresh
+            usageBar.invalidate();
         }
     }
 
@@ -135,7 +137,15 @@ public class UsageListAdapter extends RecyclerView.Adapter<UsageListAdapter.View
         return appUsageInfoList.size();
     }
 
-    public void setCustomUsageStatsList(List<AppUsageInfo> AppUsageInfoList) {
-        this.appUsageInfoList = AppUsageInfoList;
+    public void setCustomUsageStatsList(List<AppUsageInfo> appUsageInfoList) {
+        // sort according to usage time
+        appUsageInfoList.sort(new Comparator<AppUsageInfo>() {
+            @Override
+            public int compare(AppUsageInfo info1, AppUsageInfo info2) {
+                return (int) (info2.timeInForeground - info1.timeInForeground);
+            }
+        });
+
+        this.appUsageInfoList = appUsageInfoList;
     }
 }
