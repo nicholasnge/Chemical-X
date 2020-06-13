@@ -16,6 +16,7 @@
 
 package com.example.chemicalx.Fragment_Insights;
 
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,16 +28,23 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import com.example.chemicalx.R;
+import com.github.mikephil.charting.charts.BarChart;
+import com.github.mikephil.charting.charts.HorizontalBarChart;
+import com.github.mikephil.charting.components.Description;
+import com.github.mikephil.charting.data.BarData;
+import com.github.mikephil.charting.data.BarDataSet;
+import com.github.mikephil.charting.data.BarEntry;
 
 /**
  * Provide views to RecyclerView with the directory entries.
  */
 public class UsageListAdapter extends RecyclerView.Adapter<UsageListAdapter.ViewHolder> {
 
-    private List<AppUsageInfo> AppUsageInfoList = new ArrayList<>();
+    private List<AppUsageInfo> appUsageInfoList = new ArrayList<>();
     private DateFormat mDateFormat = new SimpleDateFormat();
 
     /**
@@ -46,24 +54,66 @@ public class UsageListAdapter extends RecyclerView.Adapter<UsageListAdapter.View
         private final TextView mPackageName;
         private final TextView mMinutesUsed;
         private final ImageView mAppIcon;
+        private final HorizontalBarChart usageBar;
 
         public ViewHolder(View v) {
             super(v);
             mPackageName = (TextView) v.findViewById(R.id.textview_package_name);
             mMinutesUsed = (TextView) v.findViewById(R.id.textview_minutes_used);
             mAppIcon = (ImageView) v.findViewById(R.id.app_icon);
+            usageBar = (HorizontalBarChart) v.findViewById(R.id.usage_bar_chart);
+            initialiseUsageBar();
         }
 
-        public TextView getMinutesUsed() {
-            return mMinutesUsed;
+        private void initialiseUsageBar() {
+            // make x-axis (right axis) invisible
+            usageBar.getXAxis().setEnabled(false);
+
+            // make left y-axis (top axis) invisible
+            usageBar.getAxisLeft().setEnabled(false);
+
+            // set common range, ideally should be from 0 to the largest time spent
+            usageBar.getAxisLeft().setAxisMaximum(123f); // 123f placeholder of largest
+            usageBar.getAxisLeft().setAxisMinimum(0f);
+
+            // make right y-axis (bottom axis) invisible
+            usageBar.getAxisRight().setEnabled(false);
+
+            // make legend invisible
+            usageBar.getLegend().setEnabled(false);
+
+            // make description invisible
+            usageBar.getDescription().setEnabled(false);
+
+            // disable all possible touch-interactions
+            usageBar.setTouchEnabled(false);
         }
 
-        public TextView getPackageName() {
-            return mPackageName;
+        public void updateViewHolder(AppUsageInfo appUsageInfo) {
+            mPackageName.setText(appUsageInfo.name);
+            mMinutesUsed.setText(Long.toString(appUsageInfo.timeInForeground/60000));
+            mAppIcon.setImageDrawable(appUsageInfo.appIcon);
+            updateUsageBar(appUsageInfo);
         }
 
-        public ImageView getAppIcon() {
-            return mAppIcon;
+        private void updateUsageBar(AppUsageInfo appUsageInfo) {
+            // entries for a data set, only the time in this case
+            List<BarEntry> barEntries = new ArrayList<>();
+            barEntries.add(new BarEntry(0, appUsageInfo.timeInForeground / 60 / 1000));
+
+            // the data set and its settings
+            BarDataSet barDataSet = new BarDataSet(barEntries, "App Usage");
+            barDataSet.setColor(Color.rgb(232, 174, 104));
+
+            // the bar data (all of the data sets) and its settings
+            BarData barData = new BarData(barDataSet);
+            barData.setDrawValues(false);
+
+            // set the data
+            usageBar.setData(barData);
+
+            // refresh
+            usageBar.invalidate();
         }
     }
 
@@ -79,18 +129,23 @@ public class UsageListAdapter extends RecyclerView.Adapter<UsageListAdapter.View
 
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, final int position) {
-        viewHolder.getPackageName().setText(
-                AppUsageInfoList.get(position).packageName);
-        viewHolder.getMinutesUsed().setText(Long.toString(AppUsageInfoList.get(position).timeInForeground/60000));
-        viewHolder.getAppIcon().setImageDrawable(AppUsageInfoList.get(position).appIcon);
+        viewHolder.updateViewHolder(appUsageInfoList.get(position));
     }
 
     @Override
     public int getItemCount() {
-        return AppUsageInfoList.size();
+        return appUsageInfoList.size();
     }
 
-    public void setCustomUsageStatsList(List<AppUsageInfo> AppUsageInfoList) {
-        this.AppUsageInfoList = AppUsageInfoList;
+    public void setCustomUsageStatsList(List<AppUsageInfo> appUsageInfoList) {
+        // sort according to usage time
+        appUsageInfoList.sort(new Comparator<AppUsageInfo>() {
+            @Override
+            public int compare(AppUsageInfo info1, AppUsageInfo info2) {
+                return (int) (info2.timeInForeground - info1.timeInForeground);
+            }
+        });
+
+        this.appUsageInfoList = appUsageInfoList;
     }
 }
