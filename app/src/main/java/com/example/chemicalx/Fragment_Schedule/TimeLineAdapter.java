@@ -32,7 +32,7 @@ class TimeLineAdapter extends RecyclerView.Adapter<TimeLineAdapter.TimeLineViewH
 
     @NonNull
     @Override
-    public TimeLineViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public TimeLineViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType){
         if(mLayoutInflater == null) {
             mLayoutInflater = LayoutInflater.from(parent.getContext());
         }

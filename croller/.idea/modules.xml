@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/1448205898/Croller-feature-touch_outside_circle_sensibility.iml" filepath="$PROJECT_DIR$/.idea/modules/1448205898/Croller-feature-touch_outside_circle_sensibility.iml" group="Croller-feature-touch_outside_circle_sensibility" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/39616732/app.iml" filepath="$PROJECT_DIR$/.idea/modules/39616732/app.iml" group="Croller-feature-touch_outside_circle_sensibility/app" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/croller.iml" filepath="$PROJECT_DIR$/.idea/modules/croller.iml" group="Croller-feature-touch_outside_circle_sensibility/croller" />
+    </modules>
+  </component>
+</project>

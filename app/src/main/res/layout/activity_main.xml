@@ -20,6 +20,7 @@
             android:layout_marginBottom="32dp"
             android:clickable="true"
             app:backgroundTint="@color/colorPrimary"
+            app:tint="@color/colorWhite"
             app:srcCompat="@android:drawable/ic_input_add" />
 
         <com.google.android.material.appbar.AppBarLayout
