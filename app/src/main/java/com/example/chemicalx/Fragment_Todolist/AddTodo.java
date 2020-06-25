@@ -7,7 +7,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -18,12 +21,15 @@ import com.example.chemicalx.Fragment_Todolist.crollerTest.Croller;
 import com.example.chemicalx.Fragment_Todolist.crollerTest.OnCrollerChangeListener;
 import com.example.chemicalx.R;
 
+import java.lang.reflect.Array;
 import java.util.Objects;
 
 public class AddTodo extends DialogFragment {
     EditText taskTitle;
     Croller croller;
     TextView taskDuration;
+    Spinner categorySpinner;
+    Button createTaskButton;
     int durationHours;
     int durationTenMinutes;
 
@@ -77,6 +83,23 @@ public class AddTodo extends DialogFragment {
             }
             @Override
             public void onStopTrackingTouch(Croller croller) {
+            }
+        });
+
+        // set up category spinner
+        categorySpinner = view.findViewById(R.id.category_spinner);
+        ArrayAdapter<CharSequence> arrayAdapter = ArrayAdapter.createFromResource(view.getContext(), R.array.todo_categories, android.R.layout.simple_spinner_item);
+        arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        categorySpinner.setAdapter(arrayAdapter);
+
+        // set up submit button
+        createTaskButton = view.findViewById(R.id.createTaskButton);
+        createTaskButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //pass data back
+
+                dismiss();
             }
         });
 

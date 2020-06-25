@@ -99,4 +99,7 @@ public class LoginActivity extends AppCompatActivity {
             updateUI(null);
         }
     }
+
+    public void handleLoginRegister(View view) {
+    }
 }

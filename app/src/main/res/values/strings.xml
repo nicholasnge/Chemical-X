@@ -26,4 +26,11 @@
     <string name="open_app_usage_setting">Open Apps with usage access settings</string>
     <string name="minutes_used">"minutes used: "</string>
     <string name="usage_pie_chart_title">"App Usage Summary"</string>
+
+    <string-array name="todo_categories">
+        <item>  -</item>
+        <item>Work</item>
+        <item>Recreation</item>
+        <item>Hobby</item>
+    </string-array>
 </resources>

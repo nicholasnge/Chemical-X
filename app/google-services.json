@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "661852823614",
+    "firebase_url": "https://chemical-x-d86cc.firebaseio.com",
+    "project_id": "chemical-x-d86cc",
+    "storage_bucket": "chemical-x-d86cc.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:661852823614:android:35be7b2c74f3465684b16f",
+        "android_client_info": {
+          "package_name": "com.example.chemicalx"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "661852823614-e6td13i89sbv8ga4sef2740p0stbi2tj.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.chemicalx",
+            "certificate_hash": "4bda461b39aad2a01e711060005e308d7fe1220f"
+          }
+        },
+        {
+          "client_id": "661852823614-73ng5rfalgidk9sn3u9iodinerq7sko5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAEtRpNqGfw9Er5rKiuv2kN__dZEJFF7f0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "661852823614-73ng5rfalgidk9sn3u9iodinerq7sko5.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
