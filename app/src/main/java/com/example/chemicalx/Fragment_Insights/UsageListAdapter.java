@@ -44,7 +44,7 @@ import com.github.mikephil.charting.data.BarEntry;
  */
 public class UsageListAdapter extends RecyclerView.Adapter<UsageListAdapter.ViewHolder> {
 
-    private List<AppUsageInfo> appUsageInfoList = new ArrayList<>();
+    private static List<AppUsageInfo> appUsageInfoList = new ArrayList<>();
     private DateFormat mDateFormat = new SimpleDateFormat();
 
     /**
@@ -73,7 +73,8 @@ public class UsageListAdapter extends RecyclerView.Adapter<UsageListAdapter.View
             usageBar.getAxisLeft().setEnabled(false);
 
             // set common range, ideally should be from 0 to the largest time spent
-            usageBar.getAxisLeft().setAxisMaximum(123f); // 123f placeholder of largest
+            usageBar.getAxisLeft().setAxisMaximum(
+                    appUsageInfoList.get(0).timeInForeground / 60 / 1000);
             usageBar.getAxisLeft().setAxisMinimum(0f);
 
             // make right y-axis (bottom axis) invisible
@@ -91,7 +92,7 @@ public class UsageListAdapter extends RecyclerView.Adapter<UsageListAdapter.View
 
         public void updateViewHolder(AppUsageInfo appUsageInfo) {
             mPackageName.setText(appUsageInfo.name);
-            mMinutesUsed.setText(Long.toString(appUsageInfo.timeInForeground/60000));
+            mMinutesUsed.setText(Long.toString(appUsageInfo.timeInForeground / 60000));
             mAppIcon.setImageDrawable(appUsageInfo.appIcon);
             updateUsageBar(appUsageInfo);
         }
