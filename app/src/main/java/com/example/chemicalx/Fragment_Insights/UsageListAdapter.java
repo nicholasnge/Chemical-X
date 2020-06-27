@@ -16,6 +16,7 @@
 
 package com.example.chemicalx.Fragment_Insights;
 
+import android.content.Context;
 import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,6 +24,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.text.DateFormat;
@@ -43,7 +45,6 @@ import com.github.mikephil.charting.data.BarEntry;
  * Provide views to RecyclerView with the directory entries.
  */
 public class UsageListAdapter extends RecyclerView.Adapter<UsageListAdapter.ViewHolder> {
-
     private static List<AppUsageInfo> appUsageInfoList = new ArrayList<>();
     private DateFormat mDateFormat = new SimpleDateFormat();
 
@@ -51,6 +52,7 @@ public class UsageListAdapter extends RecyclerView.Adapter<UsageListAdapter.View
      * Provide a reference to the type of views that you are using (custom ViewHolder)
      */
     public static class ViewHolder extends RecyclerView.ViewHolder {
+        private Context context;
         private final TextView mPackageName;
         private final TextView mMinutesUsed;
         private final ImageView mAppIcon;
@@ -58,6 +60,7 @@ public class UsageListAdapter extends RecyclerView.Adapter<UsageListAdapter.View
 
         public ViewHolder(View v) {
             super(v);
+            context = v.getContext();
             mPackageName = (TextView) v.findViewById(R.id.textview_package_name);
             mMinutesUsed = (TextView) v.findViewById(R.id.textview_minutes_used);
             mAppIcon = (ImageView) v.findViewById(R.id.app_icon);
@@ -104,7 +107,7 @@ public class UsageListAdapter extends RecyclerView.Adapter<UsageListAdapter.View
 
             // the data set and its settings
             BarDataSet barDataSet = new BarDataSet(barEntries, "App Usage");
-            barDataSet.setColor(Color.rgb(232, 174, 104));
+            barDataSet.setColor(context.getColor(R.color.colorSecondaryDark));
 
             // the bar data (all of the data sets) and its settings
             BarData barData = new BarData(barDataSet);

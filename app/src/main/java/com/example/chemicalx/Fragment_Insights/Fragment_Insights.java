@@ -17,6 +17,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
@@ -28,7 +29,6 @@ import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
-import com.github.mikephil.charting.formatter.ValueFormatter;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -49,6 +49,7 @@ public class Fragment_Insights extends Fragment {
     private RecyclerView.LayoutManager mLayoutManager;
     private Button mOpenUsageSettingButton;
     private PieChart usagePieChart;
+    private TextView adviceText;
 
     public Fragment_Insights() {
     }
@@ -72,6 +73,14 @@ public class Fragment_Insights extends Fragment {
     public void onViewCreated(View rootView, Bundle savedInstanceState) {
         super.onViewCreated(rootView, savedInstanceState);
 
+        // pie chart creation
+        usagePieChart = rootView.findViewById(R.id.usage_pie_chart);
+        initialisePieChart();
+
+        // productivity advice text
+        adviceText = rootView.findViewById(R.id.insights_productivity_advice_text);
+        adviceText.setSelected(true);
+
         mUsageListAdapter = new UsageListAdapter();
         appUsageInfos = new ArrayList<>();
         mOpenUsageSettingButton = (Button) rootView.findViewById(R.id.button_open_usage_setting);
@@ -81,10 +90,12 @@ public class Fragment_Insights extends Fragment {
         mRecyclerView.setAdapter(mUsageListAdapter);
         getUsageStats();
 
-        // pie chart creation
-        usagePieChart = rootView.findViewById(R.id.usage_pie_chart);
-        initialisePieChart();
+        // update pie chart with data
         updatePieChart();
+
+        // update productivity advice text
+        adviceText.setText("You are more productive after feeding Diglet.\t"
+                + "You are less productive after writing an essay.");
     }
 
     private void getUsageStats() {
@@ -203,6 +214,7 @@ public class Fragment_Insights extends Fragment {
                     getString(R.string.explanation_access_to_appusage_is_not_enabled),
                     Toast.LENGTH_LONG).show();
             mOpenUsageSettingButton.setVisibility(View.VISIBLE);
+            getActivity().findViewById(R.id.insights_data_layout).setVisibility(View.GONE);
             mOpenUsageSettingButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
