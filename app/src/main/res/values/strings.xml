@@ -33,4 +33,9 @@
         <item>Recreation</item>
         <item>Hobby</item>
     </string-array>
+
+    <string name="delete_account_setting_dialog_title">"Delete Account?"</string>
+    <string name="delete_account_setting_dialog_message">"Are you sure you want to delete your account? Deleting your account will delete your tailor-made scheduler forever."</string>
+    <string name="delete_account_setting_dialog_affirmative">"Delete account"</string>
+    <string name="cancel">"Cancel"</string>
 </resources>
