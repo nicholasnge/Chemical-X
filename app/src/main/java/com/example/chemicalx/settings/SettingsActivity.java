@@ -9,6 +9,7 @@ import androidx.fragment.app.DialogFragment;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.EditText;
 
 import com.example.chemicalx.FirebaseLoginActivity;
 import com.example.chemicalx.R;
@@ -70,11 +71,11 @@ public class SettingsActivity extends AppCompatActivity
     }
 
     @Override
-    public void onDeleteAccountSettingDialogDeleteClick(DialogFragment dialog) {
+    public void onDeleteAccountSettingDialogDeleteClick(DialogFragment dialog, String password) {
         final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
         AuthCredential credential = EmailAuthProvider
-                .getCredential("user@example.com", "password1234");
+                .getCredential(user.getEmail(), password);
 
         user.reauthenticate(credential)
                 .addOnCompleteListener(new OnCompleteListener<Void>() {

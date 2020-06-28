@@ -4,6 +4,9 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.EditText;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
@@ -17,7 +20,7 @@ public class DeleteAccountSettingDialogFragment extends DialogFragment {
      * implement this interface in order to receive event callbacks.
      * Each method passes the DialogFragment in case the host needs to query it. */
     public interface DeleteAccountSettingDialogListener {
-        public void onDeleteAccountSettingDialogDeleteClick(DialogFragment dialog);
+        public void onDeleteAccountSettingDialogDeleteClick(DialogFragment dialog, String password);
         public void onDeleteAccountSettingDialogCancelClick(DialogFragment dialog);
     }
 
@@ -38,15 +41,23 @@ public class DeleteAccountSettingDialogFragment extends DialogFragment {
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
+        // Get the layout inflater
+        LayoutInflater inflater = requireActivity().getLayoutInflater();
+       final View view = inflater
+                .inflate(R.layout.fragment_dialog_setting_account_delete, null);
+
         // Use the Builder class for convenient dialog construction
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle(R.string.delete_account_setting_dialog_title)
+                .setView(view)
                 .setMessage(R.string.delete_account_setting_dialog_message)
                 .setPositiveButton(R.string.delete_account_setting_dialog_affirmative,
                         new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
+                        EditText passwordEditText = view.findViewById(R.id.fragment_dialog_setting_account_delete_password_edittext);
+                        String password = passwordEditText.getText().toString();
                         listener.onDeleteAccountSettingDialogDeleteClick(
-                                DeleteAccountSettingDialogFragment.this);
+                                DeleteAccountSettingDialogFragment.this, password);
                     }
                 })
                 .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
