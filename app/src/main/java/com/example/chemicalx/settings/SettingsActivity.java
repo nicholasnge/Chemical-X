@@ -9,7 +9,7 @@ import androidx.fragment.app.DialogFragment;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.EditText;
+import android.widget.Toast;
 
 import com.example.chemicalx.FirebaseLoginActivity;
 import com.example.chemicalx.R;
@@ -72,7 +72,14 @@ public class SettingsActivity extends AppCompatActivity
 
     @Override
     public void onDeleteAccountSettingDialogDeleteClick(DialogFragment dialog, String password) {
+        final String METHOD_TAG = TAG + " onDeleteAccountSettingDialogDeleteClick";
         final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+        if (password == null || password.equals("")) {
+            Log.d(METHOD_TAG, "Password null or empty.");
+            onReauthenticationFailure();
+            return;
+        }
 
         AuthCredential credential = EmailAuthProvider
                 .getCredential(user.getEmail(), password);
@@ -81,18 +88,37 @@ public class SettingsActivity extends AppCompatActivity
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
-                        logout();
-                        user.delete()
-                                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<Void> task) {
-                                        if (task.isSuccessful()) {
-                                            Log.d(TAG, "User account deleted.");
+                        if (task.isSuccessful()) {
+                            Log.d(METHOD_TAG, "User re-authenticated.");
+                            user.delete()
+                                    .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<Void> task) {
+                                            if (task.isSuccessful()) {
+                                                Log.d(METHOD_TAG, "User account deleted.");
+                                                Toast.makeText(SettingsActivity.this,
+                                                        "Account deleted.",
+                                                        Toast.LENGTH_SHORT).show();
+                                                logout();
+                                            }
                                         }
-                                    }
-                                });
+                                    });
+                        } else {
+                            Log.d(METHOD_TAG, "User re-authentication failed.");
+                            onReauthenticationFailure();
+                        }
                     }
                 });
+    }
+
+    private void onReauthenticationFailure() {
+        Toast.makeText(SettingsActivity.this, "Invalid password.",
+                Toast.LENGTH_SHORT).show();
+
+        DeleteAccountSettingDialogFragment deleteAccountSettingDialogFragment =
+                new DeleteAccountSettingDialogFragment();
+        deleteAccountSettingDialogFragment.show(getSupportFragmentManager(),
+                "Delete Account Setting Dialog Fragment Retry");
     }
 
     @Override
