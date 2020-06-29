@@ -35,13 +35,15 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.GetTokenResult;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, FirebaseAuth.AuthStateListener {
     public static final String TAG = "MainActivity";
     public static final int APPUSAGE_REQUEST_CODE = 1;
     private Toolbar toolbar;
@@ -86,10 +88,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (mode != AppOpsManager.MODE_ALLOWED){
             startActivityForResult(new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS), APPUSAGE_REQUEST_CODE);
         }
-
-        if (FirebaseAuth.getInstance().getCurrentUser() == null){
-            startLoginActivity();
-        }
     }
 
     private void startLoginActivity() {
@@ -103,6 +101,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onStart();
 
         // SETTING UP GOOGLE ACCOUNT
+        // TODO: 6/25/2020 check if this code needs to be removed with the new firebase login
         GoogleSignInOptions gso = new GoogleSignInOptions
                 .Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestEmail()
@@ -122,6 +121,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             userDisplay.setText(personName);
             userContactDisplay.setText(personEmail);
         }
+
+        // Initialise this activity as firebaseAuthListener to check for user account changes
+        FirebaseAuth.getInstance().addAuthStateListener(this);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        FirebaseAuth.getInstance().removeAuthStateListener(this);
     }
 
     private void setupViewPager(ViewPager viewPager) {
@@ -142,17 +150,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 //                signOut();
 
                 //sign out using firebase
-                AuthUI.getInstance().signOut(this)
-                        .addOnCompleteListener(new OnCompleteListener<Void>() {
-                            @Override
-                            public void onComplete(@NonNull Task<Void> task) {
-                                if (task.isSuccessful()){
-                                    startLoginActivity();
-                                } else {
-                                    Log.e(TAG, "onComplete: ", task.getException());
-                                }
-                            }
-                        });
+                AuthUI.getInstance().signOut(this);
                 break;
             default:
         }
@@ -170,6 +168,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         startActivity(logoutIntent);
                     }
                 });
+    }
+
+    @Override
+    public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+        if (firebaseAuth.getCurrentUser() == null) {
+            startLoginActivity();
+        } else {
+            firebaseAuth.getCurrentUser().getIdToken(true)
+                    .addOnSuccessListener(new OnSuccessListener<GetTokenResult>() {
+                        @Override
+                        public void onSuccess(GetTokenResult getTokenResult) {
+                            Log.d(TAG, "onSuccess: " + getTokenResult.getToken());
+                        }
+                    });
+        }
     }
 
     class ViewPagerAdapter extends FragmentPagerAdapter {

@@ -4,10 +4,14 @@ import android.widget.ProgressBar;
 
 public class TodoItemModel {
     String title;
+    int totalTime;
+    int timePassed;
     int progressBar;
 
-    public TodoItemModel(String title, int progressBar) {
+    public TodoItemModel(String title, int totalTime, int timePassed) {
         this.title = title;
-        this.progressBar = progressBar;
+        this.totalTime = totalTime;
+        this.timePassed = timePassed;
+        this.progressBar = timePassed / totalTime *100;
     }
 }

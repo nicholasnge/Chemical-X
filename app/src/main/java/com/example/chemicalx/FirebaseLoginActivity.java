@@ -17,7 +17,7 @@ import com.google.firebase.auth.FirebaseUser;
 
 import java.util.Arrays;
 
-public class FirebaseLoginActivity extends AppCompatActivity {
+public class FirebaseLoginActivity extends AppCompatActivity{
     private static final int AUTHUI_REQUEST_CODE = 10001;
     Button loginRegisterButton;
 
@@ -68,7 +68,8 @@ public class FirebaseLoginActivity extends AppCompatActivity {
         Intent intent = AuthUI.getInstance()
                 .createSignInIntentBuilder()
                 .setAvailableProviders(Arrays.asList(
-                        new AuthUI.IdpConfig.EmailBuilder().build())
+                        new AuthUI.IdpConfig.EmailBuilder().build(),
+                        new AuthUI.IdpConfig.GoogleBuilder().build())
                 )
                 .setLogo(R.drawable.ic_molecular_white)
                 .setTheme(R.style.AppTheme)
