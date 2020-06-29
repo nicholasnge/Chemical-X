@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+        android:key="notifications"
+        android:title="Notifications">
+
+        <SwitchPreferenceCompat
+            android:key="enable_notifications"
+            android:title="Enable Notifications"
+            android:defaultValue="true"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:key="account"
+        android:title="Account">
+
+        <Preference
+            android:key="delete_account"
+            android:title="Delete Account"/>
+
+    </PreferenceCategory>
+
+</PreferenceScreen>
