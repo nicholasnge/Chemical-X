@@ -69,29 +69,29 @@ public class Fragment_Todolist extends Fragment {
                 .document("testuser")
                 .collection("Work")
                 .get()
-        .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-            @Override
-            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                List<DocumentSnapshot> snapshotList = queryDocumentSnapshots.getDocuments();
-                for (DocumentSnapshot snapshot : snapshotList) {
-                    snapshot.get()
-                }
+                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                        List<DocumentSnapshot> snapshotList = queryDocumentSnapshots.getDocuments();
+                        for (DocumentSnapshot snapshot : snapshotList) {
+                            snapshot.getData(); // not sure what's going on here; temporary fix
+                        }
             }
         });
         ArrayList<TodoItemModel> todoWork = new ArrayList<>();
-        todoList.add(new TodoItemModel("Finish Orbital Project", 30));
-        todoList.add(new TodoItemModel("Revise for CFA exam before December", 70));
-        todoList.add(new TodoItemModel("Study for CS3230", 45));
+        todoWork.add(new TodoItemModel("Finish Orbital Project", 30));
+        todoWork.add(new TodoItemModel("Revise for CFA exam before December", 70));
+        todoWork.add(new TodoItemModel("Study for CS3230", 45));
 
         ArrayList<TodoItemModel> todoRecreation = new ArrayList<>();
-        todoList2.add(new TodoItemModel("Not play TFT for the rest of my life please", 30));
-        todoList2.add(new TodoItemModel("Play Android Studio", 70));
-        todoList2.add(new TodoItemModel("Reach Masters in 2v2 Starcraft", 45));
+        todoRecreation.add(new TodoItemModel("Not play TFT for the rest of my life please", 30));
+        todoRecreation.add(new TodoItemModel("Play Android Studio", 70));
+        todoRecreation.add(new TodoItemModel("Reach Masters in 2v2 Starcraft", 45));
 
         ArrayList<TodoItemModel> todoHobby = new ArrayList<>();
-        todoList3.add(new TodoItemModel("Practice piano for Diya's piano piece", 30));
-        todoList3.add(new TodoItemModel("Edit video for Summer Wind", 70));
-        todoList3.add(new TodoItemModel("Learn how to paint with Bob Ross", 45));
+        todoHobby.add(new TodoItemModel("Practice piano for Diya's piano piece", 30));
+        todoHobby.add(new TodoItemModel("Edit video for Summer Wind", 70));
+        todoHobby.add(new TodoItemModel("Learn how to paint with Bob Ross", 45));
 
         mDataList.clear();
         mDataList.add(new TodoCategoryModel("Work", todoWork, R.color.MaterialBlue50, R.color.MaterialBlue100));
