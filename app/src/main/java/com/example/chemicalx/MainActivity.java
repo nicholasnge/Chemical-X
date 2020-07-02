@@ -1,5 +1,6 @@
 package com.example.chemicalx;
 
+import android.Manifest;
 import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.Intent;
@@ -14,7 +15,9 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
@@ -24,6 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.example.chemicalx.Fragment_Schedule.Fragment_Schedule;
+import com.example.chemicalx.Fragment_Schedule.ReadCalendarPermissionDialogFragment;
 import com.example.chemicalx.Fragment_Todolist.Fragment_Todolist;
 import com.example.chemicalx.Fragment_Insights.Fragment_Insights;
 import com.example.chemicalx.settings.SettingsActivity;
@@ -41,17 +45,21 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.GetTokenResult;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, FirebaseAuth.AuthStateListener {
+        implements NavigationView.OnNavigationItemSelectedListener, FirebaseAuth.AuthStateListener,
+        ReadCalendarPermissionDialogFragment.ReadCalendarPermissionDialogListener {
     public static final String TAG = "MainActivity";
     public static final int APPUSAGE_REQUEST_CODE = 1;
     private Toolbar toolbar;
     private TabLayout tabLayout;
     private ViewPager viewPager;
+    private ViewPagerAdapter viewPagerAdapter;
     private GoogleSignInClient googleSignInClient;
 
     NavigationView navView;
     DrawerLayout drawerLayout;
     ActionBarDrawerToggle toggle;
+
+    private Fragment_Schedule schedule;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +72,7 @@ public class MainActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
 
         //set up tabs (fragments one two)
+        schedule = new Fragment_Schedule();
         viewPager = (ViewPager) findViewById(R.id.viewpager);
         setupViewPager(viewPager);
         tabLayout = (TabLayout) findViewById(R.id.tabs);
@@ -92,42 +101,6 @@ public class MainActivity extends AppCompatActivity
                 android.os.Process.myUid(), getPackageName());
         if (mode != AppOpsManager.MODE_ALLOWED){
             startActivityForResult(new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS), APPUSAGE_REQUEST_CODE);
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                                           int[] grantResults) {
-        switch (requestCode) {
-            case Fragment_Schedule.READ_CALENDAR_PERMISSION_REQUEST_CODE:
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0 &&
-                        grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    Fragment_Schedule.isReadCalendarEnabled = true;
-                }  else {
-                    // Explain to the user that the feature is unavailable because
-                    // the features requires a permission that the user has denied.
-                    // At the same time, respect the user's decision. Don't link to
-                    // system settings in an effort to convince the user to change
-                    // their decision.
-                }
-                return;
-            case Fragment_Schedule.WRITE_CALENDAR_PERMISSION_REQUEST_CODE:
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0 &&
-                        grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    // Permission is granted. Continue the action or workflow
-                    // in your app.
-                }  else {
-                    // Explain to the user that the feature is unavailable because
-                    // the features requires a permission that the user has denied.
-                    // At the same time, respect the user's decision. Don't link to
-                    // system settings in an effort to convince the user to change
-                    // their decision.
-                }
-                return;
-        // Other 'case' lines to check for other
-        // permissions this app might request.
         }
     }
 
@@ -174,11 +147,11 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void setupViewPager(ViewPager viewPager) {
-        ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
-        adapter.addFragment(new Fragment_Schedule(), "SCHEDULE");
-        adapter.addFragment(new Fragment_Todolist(), "TASKS");
-        adapter.addFragment(new Fragment_Insights(), "INSIGHTS");
-        viewPager.setAdapter(adapter);
+        viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager());
+        viewPagerAdapter.addFragment(schedule, "SCHEDULE");
+        viewPagerAdapter.addFragment(new Fragment_Todolist(), "TASKS");
+        viewPagerAdapter.addFragment(new Fragment_Insights(), "INSIGHTS");
+        viewPager.setAdapter(viewPagerAdapter);
     }
 
     @Override
@@ -257,5 +230,72 @@ public class MainActivity extends AppCompatActivity
         public CharSequence getPageTitle(int position) {
             return mFragmentTitleList.get(position);
         }
+
+        @Override
+        public int getItemPosition(Object object) {
+            if (object instanceof Fragment_Schedule) {
+                Fragment_Schedule sched = (Fragment_Schedule) object;
+                if (sched.needsToRefresh()) {
+                    sched.hasRefreshed();
+                    return FragmentPagerAdapter.POSITION_NONE;
+                }
+            }
+
+            return super.getItemPosition(object);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                                           int[] grantResults) {
+        switch (requestCode) {
+            case Fragment_Schedule.READ_CALENDAR_PERMISSION_REQUEST_CODE:
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0 &&
+                        grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // Permission is granted. Continue the action or workflow
+                    // in your app.
+                    Fragment_Schedule.isReadCalendarGranted = true;
+                    schedule.refresh();
+                    viewPagerAdapter.notifyDataSetChanged();
+                }  else {
+                    // Explain to the user that the feature is unavailable because
+                    // the features requires a permission that the user has denied.
+                    // At the same time, respect the user's decision. Don't link to
+                    // system settings in an effort to convince the user to change
+                    // their decision.
+                    Fragment_Schedule.isReadCalendarGranted = false;
+                }
+                return;
+            case Fragment_Schedule.WRITE_CALENDAR_PERMISSION_REQUEST_CODE:
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0 &&
+                        grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // Permission is granted. Continue the action or workflow
+                    // in your app.
+                    Fragment_Schedule.isWriteCalendarGranted = true;
+                }  else {
+                    // Explain to the user that the feature is unavailable because
+                    // the features requires a permission that the user has denied.
+                    // At the same time, respect the user's decision. Don't link to
+                    // system settings in an effort to convince the user to change
+                    // their decision.
+                    Fragment_Schedule.isWriteCalendarGranted = false;
+                }
+                return;
+            // Other 'case' lines to check for other
+            // permissions this app might request.
+        }
+    }
+
+    public void onReadCalendarPermissionDialogGrantClick(DialogFragment dialog) {
+        // request READ_CALENDAR permission
+        ActivityCompat.requestPermissions(this,
+                new String[] { Manifest.permission.READ_CALENDAR },
+                Fragment_Schedule.READ_CALENDAR_PERMISSION_REQUEST_CODE);
+    }
+
+    public void onReadCalendarPermissionDialogDenyClick(DialogFragment dialog) {
+        dialog.getDialog().cancel();
     }
 }

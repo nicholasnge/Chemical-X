@@ -10,31 +10,62 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/schedule_date_and_day"
-            style="@style/TextAppearance.AppCompat.Title"
+        <LinearLayout
+            android:id="@+id/schedule_read_calendar_denied_layout"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="12dp"
-            android:textAppearance="@style/TextAppearance.AppCompat.Display1" />
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:visibility="visible">
 
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recyclerView"
+            <TextView
+                android:id="@+id/schedule_read_calendar_disabled_text"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_alignParentEnd="true"
-                android:layout_alignParentBottom="true"
-                android:layout_marginEnd="0dp"
-                android:layout_marginBottom="0dp"
-                android:background="@color/colorWhite"
-                android:clipToPadding="false"
+                android:layout_height="wrap_content"
+                android:padding="20dp"
+                android:text="@string/schedule_read_calendar_disabled_msg" />
+
+            <Button
+                android:id="@+id/schedule_read_calendar_disabled_grant_permission_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="20dp"
+                android:text="@string/schedule_read_calendar_disabled_grant_permission_button_text" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/schedule_read_calendar_granted_layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/schedule_date_and_day"
+                style="@style/TextAppearance.AppCompat.Title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:padding="12dp"
-                app:layout_behavior="@string/appbar_scrolling_view_behavior"
-                tools:listitem="@layout/item_timeline" />
-        </RelativeLayout>
+                android:textAppearance="@style/TextAppearance.AppCompat.Display1" />
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recyclerView"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentBottom="true"
+                    android:layout_marginEnd="0dp"
+                    android:layout_marginBottom="0dp"
+                    android:background="@color/colorWhite"
+                    android:clipToPadding="false"
+                    android:padding="12dp"
+                    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+                    tools:listitem="@layout/item_timeline" />
+            </RelativeLayout>
+        </LinearLayout>
+
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>

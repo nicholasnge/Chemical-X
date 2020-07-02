@@ -24,18 +24,18 @@ public class DeleteAccountSettingDialogFragment extends DialogFragment {
         public void onDeleteAccountSettingDialogCancelClick(DialogFragment dialog);
     }
 
-    // Override the Fragment.onAttach() method to instantiate the NoticeDialogListener
+    // Override the Fragment.onAttach() method to instantiate the DeleteAccountSettingDialogListener
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
         // Verify that the host activity implements the callback interface
         try {
-            // Instantiate the NoticeDialogListener so we can send events to the host
+            // Instantiate the DeleteAccountSettingDialogListener so we can send events to the host
             listener = (DeleteAccountSettingDialogListener) context;
         } catch (ClassCastException e) {
             // The activity doesn't implement the interface, throw exception
             throw new ClassCastException(context.toString()
-                    + " must implement NoticeDialogListener");
+                    + " must implement DeleteAccountSettingDialogListener");
         }
     }
 
@@ -43,7 +43,7 @@ public class DeleteAccountSettingDialogFragment extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         // Get the layout inflater
         LayoutInflater inflater = requireActivity().getLayoutInflater();
-       final View view = inflater
+        final View view = inflater
                 .inflate(R.layout.fragment_dialog_setting_account_delete, null);
 
         // Use the Builder class for convenient dialog construction
