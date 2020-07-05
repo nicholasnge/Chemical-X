@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.example.chemicalx.Fragment_Schedule.Fragment_Schedule;
-import com.example.chemicalx.Fragment_Todolist.Fragment_Todolist;
+import com.example.chemicalx.Fragment_Todolist.Fragment_Tasks;
 import com.example.chemicalx.Fragment_Insights.Fragment_Insights;
 import com.example.chemicalx.settings.SettingsActivity;
 import com.firebase.ui.auth.AuthUI;
@@ -37,6 +37,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.GetTokenResult;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, FirebaseAuth.AuthStateListener {
     public static final String TAG = "MainActivity";
@@ -130,7 +131,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private void setupViewPager(ViewPager viewPager) {
         ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
         adapter.addFragment(new Fragment_Schedule(), "SCHEDULE");
-        adapter.addFragment(new Fragment_Todolist(), "TASKS");
+        adapter.addFragment(new Fragment_Tasks(), "TASKS");
         adapter.addFragment(new Fragment_Insights(), "INSIGHTS");
         viewPager.setAdapter(adapter);
     }

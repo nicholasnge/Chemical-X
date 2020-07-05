@@ -29,7 +29,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-public class AddTodo extends DialogFragment {
+public class AddTask extends DialogFragment {
     FirebaseFirestore db;
     EditText taskTitle;
     Croller croller;
@@ -39,7 +39,7 @@ public class AddTodo extends DialogFragment {
     int durationHours;
     int durationTenMinutes;
 
-    public AddTodo() {
+    public AddTask() {
     }
 
     @Override
@@ -91,13 +91,14 @@ public class AddTodo extends DialogFragment {
                 //pass data back
                 Map<String, Object> task = new HashMap<>();
                 task.put("title", taskTitle.getText().toString());
+                task.put("category", categorySpinner.getSelectedItem().toString());
                 task.put("totalTime", getMinutes(croller.getProgress()));
                 task.put("timePassed", 0);
 
                 db.collection("users")
                         // TODO: 6/25/2020 change to ID of current user
                         .document("testuser")
-                        .collection(categorySpinner.getSelectedItem().toString())
+                        .collection("tasks")
                         .add(task)
                         .addOnFailureListener(new OnFailureListener() {
                             @Override
