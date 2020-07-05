@@ -29,7 +29,7 @@
         android:layout_gravity="start|center_vertical"
         android:layout_marginStart="10dp"
         android:text="Finish Orbital Project with Jay"
-        android:textColor="@color/colorGrey900"
+        android:textColor="@color/colorBlack"
         android:textSize="14sp" />
 
 </com.google.android.material.card.MaterialCardView>

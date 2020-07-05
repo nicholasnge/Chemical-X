@@ -2,8 +2,8 @@ package com.example.chemicalx.Fragment_Tasks;
 
 public class TaskItemModel {
     String title;
-    int totalTime;
-    int timePassed;
+    int totalTime;// in seconds
+    int timePassed;// in seconds
     int progressBar;
 
     public TaskItemModel(String title, int timePassed, int totalTime) {
@@ -18,6 +18,11 @@ public class TaskItemModel {
         this.title = title;
         this.totalTime = totalTime;
         this.timePassed = 0;
-        this.progressBar = timePassed / totalTime *100;
+        this.progressBar = timePassed*100 / totalTime ;
+    }
+
+    public void incrementProgress(){
+        this.timePassed +=1;
+        this.progressBar = timePassed*100 / totalTime ;
     }
 }

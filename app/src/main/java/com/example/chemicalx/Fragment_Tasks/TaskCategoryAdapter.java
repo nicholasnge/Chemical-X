@@ -15,13 +15,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TaskCategoryAdapter extends RecyclerView.Adapter<TaskCategoryAdapter.CategoryViewHolder> {
-    Context context;
+    Fragment_Tasks fragment_tasks;
     List<TaskCategoryModel> mCategoryList;
     LayoutInflater mLayoutInflater = null;
 
-    public TaskCategoryAdapter(Context context, List<TaskCategoryModel> mCategoryList){
+    public TaskCategoryAdapter(Fragment_Tasks fragment_tasks, List<TaskCategoryModel> mCategoryList){
         super();
-        this.context = context;
+        this.fragment_tasks = fragment_tasks;
         this.mCategoryList = mCategoryList;
     }
 
@@ -31,7 +31,7 @@ public class TaskCategoryAdapter extends RecyclerView.Adapter<TaskCategoryAdapte
         if(mLayoutInflater == null) {
             mLayoutInflater = LayoutInflater.from(parent.getContext());
         }
-        return new TaskCategoryAdapter.CategoryViewHolder(mLayoutInflater.inflate(R.layout.category_todo, parent, false));
+        return new TaskCategoryAdapter.CategoryViewHolder(mLayoutInflater.inflate(R.layout.category_task, parent, false));
     }
 
     @Override
@@ -40,14 +40,14 @@ public class TaskCategoryAdapter extends RecyclerView.Adapter<TaskCategoryAdapte
         holder.categoryTitle.setText(categoryModel.title);
         ArrayList<TaskItemModel> todoList = categoryModel.todoList;
 
-        TaskItemAdapter todoItemAdapter = new TaskItemAdapter(context, todoList, categoryModel.backgroundColor, categoryModel.progressColor);
-        holder.categoryRecyclerView.setLayoutManager(new LinearLayoutManager(context) {
+        TaskItemAdapter taskItemAdapter = new TaskItemAdapter(fragment_tasks, todoList, categoryModel.backgroundColor, categoryModel.progressColor);
+        holder.categoryRecyclerView.setLayoutManager(new LinearLayoutManager(fragment_tasks.getContext()) {
             @Override
             public boolean canScrollVertically() {
                 return false;
             }
         });
-        holder.categoryRecyclerView.setAdapter(todoItemAdapter);
+        holder.categoryRecyclerView.setAdapter(taskItemAdapter);
     }
 
     @Override

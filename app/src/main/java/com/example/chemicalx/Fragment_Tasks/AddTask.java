@@ -88,7 +88,7 @@ public class AddTask extends DialogFragment {
                 Map<String, Object> task = new HashMap<>();
                 task.put("title", taskTitle.getText().toString());
                 task.put("category", categorySpinner.getSelectedItem().toString());
-                task.put("totalTime", getMinutes(croller.getProgress()));
+                task.put("totalTime", getSeconds(croller.getProgress()));
                 task.put("timePassed", 0);
 
                 db.collection("users")
@@ -129,7 +129,7 @@ public class AddTask extends DialogFragment {
         }
     }
 
-    private int getMinutes(int progress) {
+    private int getSeconds(int progress) {
         int minutes = 0;
 
         //if duration exceeds 3hours, each ticker is 30 mins beyond 3 hours
@@ -142,6 +142,6 @@ public class AddTask extends DialogFragment {
         else {
             minutes = progress * 10;
         }
-        return minutes;
+        return minutes * 60; //convert to seconds
     }
 }

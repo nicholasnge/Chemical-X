@@ -28,7 +28,6 @@
     <string name="usage_pie_chart_title">"App Usage Summary"</string>
 
     <string-array name="todo_categories">
-        <item>  -</item>
         <item>Work</item>
         <item>Recreation</item>
         <item>Hobby</item>
