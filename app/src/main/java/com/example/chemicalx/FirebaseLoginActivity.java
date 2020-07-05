@@ -17,7 +17,7 @@ import com.google.firebase.auth.FirebaseUser;
 
 import java.util.Arrays;
 
-public class FirebaseLoginActivity extends AppCompatActivity{
+public class FirebaseLoginActivity extends AppCompatActivity {
     private static final int AUTHUI_REQUEST_CODE = 10001;
     Button loginRegisterButton;
 

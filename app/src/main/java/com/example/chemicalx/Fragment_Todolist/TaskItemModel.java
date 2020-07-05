@@ -14,4 +14,12 @@ public class TaskItemModel {
         this.timePassed = timePassed;
         this.progressBar = timePassed*100 / totalTime ;
     }
+
+    // temporary fix
+    public TodoItemModel(String title, int totalTime) {
+        this.title = title;
+        this.totalTime = totalTime;
+        this.timePassed = 0;
+        this.progressBar = timePassed / totalTime *100;
+    }
 }
