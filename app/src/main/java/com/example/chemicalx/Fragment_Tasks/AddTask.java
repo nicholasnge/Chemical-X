@@ -1,11 +1,9 @@
-package com.example.chemicalx.Fragment_Todolist;
+package com.example.chemicalx.Fragment_Tasks;
 
-import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -18,16 +16,14 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
-import com.example.chemicalx.Fragment_Todolist.crollerTest.Croller;
-import com.example.chemicalx.Fragment_Todolist.crollerTest.OnCrollerChangeListener;
+import com.example.chemicalx.Fragment_Tasks.crollerTest.Croller;
+import com.example.chemicalx.Fragment_Tasks.crollerTest.OnCrollerChangeListener;
 import com.example.chemicalx.R;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-import java.lang.reflect.Array;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 public class AddTask extends DialogFragment {
     FirebaseFirestore db;

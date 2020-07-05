@@ -70,7 +70,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/taskTitle" />
 
-    <com.example.chemicalx.Fragment_Todolist.crollerTest.Croller
+    <com.example.chemicalx.Fragment_Tasks.crollerTest.Croller
         android:id="@+id/croller"
         android:layout_width="match_parent"
         android:layout_height="320dp"

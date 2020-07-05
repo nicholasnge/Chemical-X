@@ -1,4 +1,4 @@
-package com.example.chemicalx.Fragment_Todolist.crollerTest;
+package com.example.chemicalx.Fragment_Tasks.crollerTest;
 
 import android.content.Context;
 import android.content.res.AssetManager;
@@ -13,8 +13,7 @@ import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
 
-import com.example.chemicalx.Fragment_Todolist.crollerTest.OnCrollerChangeListener;
-import com.example.chemicalx.Fragment_Todolist.crollerTest.utilities.Utils;
+import com.example.chemicalx.Fragment_Tasks.crollerTest.utilities.Utils;
 
 public class Croller extends View {
 
