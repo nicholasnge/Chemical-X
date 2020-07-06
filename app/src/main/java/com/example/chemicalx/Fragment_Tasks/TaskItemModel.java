@@ -5,20 +5,16 @@ public class TaskItemModel {
     int totalTime;// in seconds
     int timePassed;// in seconds
     int progressBar;
+    String category;
+    String docID;
 
-    public TaskItemModel(String title, int timePassed, int totalTime) {
+    public TaskItemModel(String title, int timePassed, int totalTime, String category, String docID) {
         this.title = title;
         this.totalTime = totalTime;
         this.timePassed = timePassed;
-        this.progressBar = timePassed*100 / totalTime ;
-    }
-
-    // temporary fix
-    public TaskItemModel(String title, int totalTime) {
-        this.title = title;
-        this.totalTime = totalTime;
-        this.timePassed = 0;
-        this.progressBar = timePassed*100 / totalTime ;
+        this.progressBar = timePassed*100 / totalTime;
+        this.category = category;
+        this.docID = docID;
     }
 
     public void incrementProgress(){

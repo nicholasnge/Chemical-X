@@ -12,12 +12,15 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.chemicalx.R;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class TaskCategoryAdapter extends RecyclerView.Adapter<TaskCategoryAdapter.CategoryViewHolder> {
     Fragment_Tasks fragment_tasks;
     List<TaskCategoryModel> mCategoryList;
     LayoutInflater mLayoutInflater = null;
+    Map<String, TaskItemAdapter> taskItemAdapters = new HashMap<>();
 
     public TaskCategoryAdapter(Fragment_Tasks fragment_tasks, List<TaskCategoryModel> mCategoryList){
         super();
@@ -41,6 +44,7 @@ public class TaskCategoryAdapter extends RecyclerView.Adapter<TaskCategoryAdapte
         ArrayList<TaskItemModel> todoList = categoryModel.todoList;
 
         TaskItemAdapter taskItemAdapter = new TaskItemAdapter(fragment_tasks, todoList, categoryModel.backgroundColor, categoryModel.progressColor);
+        taskItemAdapters.put(categoryModel.title,taskItemAdapter);
         holder.categoryRecyclerView.setLayoutManager(new LinearLayoutManager(fragment_tasks.getContext()) {
             @Override
             public boolean canScrollVertically() {

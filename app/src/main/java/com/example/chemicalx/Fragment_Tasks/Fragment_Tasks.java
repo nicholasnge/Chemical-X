@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
@@ -16,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.chemicalx.R;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
@@ -24,6 +26,8 @@ import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -42,6 +46,7 @@ public class Fragment_Tasks extends Fragment {
     TaskItemModel selectedTask;
     TaskItemAdapter.TodoViewHolder selectedTaskViewholder;
     Timer timer;
+    Date startTimestamp;
     int previousProgressColorOfSelected;
     int previousBackgroundColorOfSelected;
 
@@ -73,8 +78,8 @@ public class Fragment_Tasks extends Fragment {
         getTasks();
 
         //set floating action button to open addTodo
-        FloatingActionButton button = getActivity().findViewById(R.id.floatingActionButton);
-        button.setOnClickListener(new View.OnClickListener() {
+        fab = getActivity().findViewById(R.id.floatingActionButton);
+        fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 DialogFragment addTodo = new AddTask();
@@ -111,13 +116,17 @@ public class Fragment_Tasks extends Fragment {
                             return;
                         }
                         if (queryDocumentSnapshots != null) {
+                            boolean added = false;
                             for (DocumentChange docChange : queryDocumentSnapshots.getDocumentChanges()) {
                                 if (docChange.getType() == DocumentChange.Type.ADDED) {
+                                    added = true;
                                     DocumentSnapshot snapshot = docChange.getDocument();
 
                                     TaskItemModel task = new TaskItemModel(snapshot.getString("title"),
                                             snapshot.getLong("timePassed").intValue(), //timePassed and totalTime are in seconds
-                                            snapshot.getLong("totalTime").intValue());
+                                            snapshot.getLong("totalTime").intValue(),
+                                            snapshot.getString("category"),
+                                            snapshot.getId());
 
                                     switch (snapshot.getString("category")) {
                                         case "Work":
@@ -132,15 +141,16 @@ public class Fragment_Tasks extends Fragment {
                                         default:
                                             Log.e(TAG, "snapshot: no such category");
                                     }
+                                    // find the taskItemAdapter responsible for updating its recyclerview
+                                    TaskItemAdapter adapter = mAdapter.taskItemAdapters.get(snapshot.getString("category"));
+                                    adapter.notifyItemInserted(adapter.taskList.size()-1);
                                 }
-
-                                //update the recyclerview that holds the data
-                                updateRecyclerView();
                             }
                         }
                     }
                 });
     }
+
     private void initRecyclerView() {
         mLayoutManager = new LinearLayoutManager(getActivity()) {
             @Override
@@ -148,12 +158,9 @@ public class Fragment_Tasks extends Fragment {
                 return false;
             }
         };
-        recyclerView.setLayoutManager(mLayoutManager);
-    }
-
-    private void updateRecyclerView() {
         mAdapter = new TaskCategoryAdapter(this, mDataList);
         recyclerView.setAdapter(mAdapter);
+        recyclerView.setLayoutManager(mLayoutManager);
     }
 
     @Override
@@ -161,21 +168,23 @@ public class Fragment_Tasks extends Fragment {
         super.onViewCreated(rootView, savedInstanceState);
     }
 
-    public void selectTask(final TaskItemAdapter.TodoViewHolder holder, final TaskItemModel todoItemModel, int progressColor, int backgroundColor){
+    public void selectTask(final TaskItemAdapter.TodoViewHolder holder, final TaskItemModel todoItemModel, int progressColor, int backgroundColor) {
         // if item was already selected, deselect
-        if (todoItemModel == selectedTask){
+        if (todoItemModel == selectedTask) {
+            updateFirebase(); //update current task
             deselectCurrentTask();
         }
         // else handle select
         else {
-            if (selectedTask != null){
-                //deselect current task
-                deselectCurrentTask();
+            if (selectedTask != null) {
+                updateFirebase(); //update current task
+                deselectCurrentTask(); // deselect current task
             }
             selectedTask = todoItemModel;
             selectedTaskViewholder = holder;
             previousBackgroundColorOfSelected = backgroundColor;
             previousProgressColorOfSelected = progressColor;
+            startTimestamp = new Date();
 
             //format card to look like its selected
             holder.cardView.setCardElevation(20);
@@ -184,7 +193,7 @@ public class Fragment_Tasks extends Fragment {
 
             //timer object to increase timePassed every second
             timer = new Timer();
-            TimerTask updateProgress = new TimerTask(){
+            TimerTask updateProgress = new TimerTask() {
                 @Override
                 public void run() {
                     todoItemModel.incrementProgress();
@@ -195,14 +204,56 @@ public class Fragment_Tasks extends Fragment {
         }
     }
 
-    public void deselectCurrentTask(){
+    public void updateFirebase() {
+        //update task document
+        db.collection("users")
+                .document("testuser")
+                .collection("tasks")
+                .document(selectedTask.docID)
+                .update("timePassed", selectedTask.timePassed);
+
+        //update user history
+        HashMap<String, Object> newhistory = new HashMap<>();
+        newhistory.put("docID", selectedTask.docID);
+        newhistory.put("category", selectedTask.category);
+        newhistory.put("timeStart", new Timestamp(startTimestamp));
+        newhistory.put("timeEnd", new Timestamp(new Date()));
+        newhistory.put("completion", false);
+
+        db.collection("users")
+                .document("testuser")
+                .collection("history")
+                .add(newhistory);
+    }
+
+    public void deselectCurrentTask() {
+        //deselect
+        selectedTask = null;
+        timer.cancel();
+
         //make it look normal again
         selectedTaskViewholder.cardView.setCardElevation(1);
         selectedTaskViewholder.progressBar.setProgressTintList(ColorStateList.valueOf(getContext().getResources().getColor(previousProgressColorOfSelected)));
         selectedTaskViewholder.progressBar.setProgressBackgroundTintList(ColorStateList.valueOf(getContext().getResources().getColor(previousBackgroundColorOfSelected)));
+    }
 
-        //deselect
-        selectedTask = null;
-        timer.cancel();
+    public void completeTask(TaskItemAdapter.TodoViewHolder holder, TaskItemModel task) {
+        db.collection("users")
+                .document("testuser")
+                .collection("tasks")
+                .document(task.docID)
+                .delete();
+
+        //update user history
+        HashMap<String, Object> newhistory = new HashMap<>();
+        newhistory.put("docID", task.docID);
+        newhistory.put("category", task.category);
+        newhistory.put("timeFinished", new Timestamp(new Date()));
+        newhistory.put("completion", true);
+
+        db.collection("users")
+                .document("testuser")
+                .collection("history")
+                .add(newhistory);
     }
 }

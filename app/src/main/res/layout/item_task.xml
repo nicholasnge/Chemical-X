@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
 
-    android:id="@+id/todoCardView"
+    android:id="@+id/taskCardView"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_gravity="center_vertical"
@@ -13,7 +13,7 @@
     app:cardBackgroundColor="@color/colorGrey50">
 
     <ProgressBar
-        android:id="@+id/todoProgressBar"
+        android:id="@+id/taskProgressBar"
         style="@android:style/Widget.ProgressBar.Horizontal"
         android:layout_width="match_parent"
         android:layout_height="50dp"
@@ -23,13 +23,21 @@
         android:progressTint="@color/MaterialGreen100" />
 
     <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/todoTitle"
+        android:id="@+id/taskTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="start|center_vertical"
         android:layout_marginStart="10dp"
         android:text="Finish Orbital Project with Jay"
         android:textColor="@color/colorBlack"
-        android:textSize="14sp" />
+        android:textSize="15sp" />
+
+    <ImageView
+        android:id="@+id/taskCompleteButton"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_gravity="center_vertical|end"
+        android:layout_margin="5dp"
+        app:srcCompat="@drawable/ic_outline_radio_button_unchecked_24" />
 
 </com.google.android.material.card.MaterialCardView>
