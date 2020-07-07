@@ -55,8 +55,8 @@ public class TaskItemAdapter extends RecyclerView.Adapter<TaskItemAdapter.TodoVi
         holder.button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                fragment_tasks.completeTask(holder, todoItemModel);
                 taskList.remove(todoItemModel);
+                fragment_tasks.completeTask(holder, todoItemModel);
                 notifyItemRemoved(holder.getAdapterPosition());
                 notifyItemRangeChanged(holder.getAdapterPosition(), taskList.size());
             }

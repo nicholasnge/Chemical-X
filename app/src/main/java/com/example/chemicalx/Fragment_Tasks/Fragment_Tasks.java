@@ -122,11 +122,13 @@ public class Fragment_Tasks extends Fragment {
                                     added = true;
                                     DocumentSnapshot snapshot = docChange.getDocument();
 
-                                    TaskItemModel task = new TaskItemModel(snapshot.getString("title"),
-                                            snapshot.getLong("timePassed").intValue(), //timePassed and totalTime are in seconds
-                                            snapshot.getLong("totalTime").intValue(),
+                                    TaskItemModel task = new TaskItemModel(
+                                            snapshot.getId(),
+                                            snapshot.getString("title"),
                                             snapshot.getString("category"),
-                                            snapshot.getId());
+                                            snapshot.getLong("totalTime").intValue(),
+                                            snapshot.getLong("timePassed").intValue(),
+                                            snapshot.getTimestamp("dueDate"));
 
                                     switch (snapshot.getString("category")) {
                                         case "Work":
@@ -143,7 +145,8 @@ public class Fragment_Tasks extends Fragment {
                                     }
                                     // find the taskItemAdapter responsible for updating its recyclerview
                                     TaskItemAdapter adapter = mAdapter.taskItemAdapters.get(snapshot.getString("category"));
-                                    adapter.notifyItemInserted(adapter.taskList.size()-1);
+                                    adapter.notifyItemInserted(adapter.taskList.size());
+                                    mAdapter.notifyChange(snapshot.getString("category"));
                                 }
                             }
                         }
@@ -249,11 +252,16 @@ public class Fragment_Tasks extends Fragment {
         newhistory.put("docID", task.docID);
         newhistory.put("category", task.category);
         newhistory.put("timeFinished", new Timestamp(new Date()));
+        newhistory.put("timeRemaining", task.timePassed);
+        newhistory.put("totalTime", task.totalTime);
         newhistory.put("completion", true);
 
         db.collection("users")
                 .document("testuser")
                 .collection("history")
                 .add(newhistory);
+
+        // notify category adapter
+        mAdapter.notifyChange(task.category);
     }
 }

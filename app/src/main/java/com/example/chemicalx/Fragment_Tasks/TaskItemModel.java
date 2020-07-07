@@ -1,20 +1,25 @@
 package com.example.chemicalx.Fragment_Tasks;
 
+import com.google.firebase.Timestamp;
+
 public class TaskItemModel {
+    String docID;
     String title;
+    String category;
     int totalTime;// in seconds
     int timePassed;// in seconds
     int progressBar;
-    String category;
-    String docID;
+    Timestamp dueDate;
 
-    public TaskItemModel(String title, int timePassed, int totalTime, String category, String docID) {
+
+    public TaskItemModel(String docID, String title, String category, int totalTime, int timePassed, Timestamp dueDate) {
+        this.docID = docID;
         this.title = title;
+        this.category = category;
         this.totalTime = totalTime;
         this.timePassed = timePassed;
         this.progressBar = timePassed*100 / totalTime;
-        this.category = category;
-        this.docID = docID;
+        this.dueDate = dueDate;
     }
 
     public void incrementProgress(){

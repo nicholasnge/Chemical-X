@@ -3,6 +3,7 @@ package com.example.chemicalx.Fragment_Schedule;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -55,13 +56,13 @@ public class Fragment_Schedule extends Fragment {
     // Projection array. Creating indices for this array instead of doing
     // dynamic lookups improves performance.
     private static final String[] PROJECTION = new String[]{
-            CalendarContract.Events.TITLE,
-            CalendarContract.Events.DTSTART
+            CalendarContract.Instances.TITLE,
+            CalendarContract.Instances.BEGIN
     };
 
     // The indices for the projection array above.
     private static final int PROJECTION_TITLE_INDEX = 0;
-    private static final int PROJECTION_DTSTART_INDEX = 1;
+    private static final int PROJECTION_BEGIN_INDEX = 1;
 
     public Fragment_Schedule() {
         // Required empty public constructor
@@ -116,16 +117,17 @@ public class Fragment_Schedule extends Fragment {
 
         // Run query
         ContentResolver cr = getContext().getContentResolver();
-        Uri uri = CalendarContract.Events.CONTENT_URI;
-        // select events that started today and that were not deleted
-        String selection =
-                "((" + CalendarContract.Events.DTSTART + " >= " + start.getTimeInMillis() + ") "
-                + "AND (" + CalendarContract.Events.DTSTART + " <= " + end.getTimeInMillis() + ") "
-                + "AND (deleted != 1))";
+        Uri uri = CalendarContract.Instances.CONTENT_URI;
+
+        // Construct the query with the desired date range.
+        Uri.Builder builder = CalendarContract.Instances.CONTENT_URI.buildUpon();
+        ContentUris.appendId(builder, start.getTimeInMillis());
+        ContentUris.appendId(builder, end.getTimeInMillis());
+
         // Submit the query and get a Cursor object back.
         // method called only after READ_CALENDAR permission obtained so can suppress
         @SuppressLint("MissingPermission")
-        Cursor cur = cr.query(uri, PROJECTION, selection, null, null);
+        Cursor cur = cr.query(builder.build(), PROJECTION, null, null, null);
 
         // Use the cursor to step through the returned records
         while (cur.moveToNext()) {
@@ -135,7 +137,7 @@ public class Fragment_Schedule extends Fragment {
 
             // Get the field values
             title = cur.getString(PROJECTION_TITLE_INDEX);
-            dtstart = cur.getLong(PROJECTION_DTSTART_INDEX);
+            dtstart = cur.getLong(PROJECTION_BEGIN_INDEX);
 
             // processing of values
             // temporary placeholder status for now
@@ -235,7 +237,7 @@ public class Fragment_Schedule extends Fragment {
         } else {
             // You can directly ask for the permission.
             ActivityCompat.requestPermissions(getActivity(),
-                    new String[] { Manifest.permission.READ_CALENDAR },
+                    new String[]{Manifest.permission.READ_CALENDAR},
                     READ_CALENDAR_PERMISSION_REQUEST_CODE);
         }
     }

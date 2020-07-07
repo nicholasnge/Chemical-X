@@ -68,7 +68,7 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
 
         //mount toolbar
-        toolbar = (Toolbar) findViewById(R.id.main_toolbar);
+        toolbar = (Toolbar) findViewById(R.id.addTaskToolbar);
         setSupportActionBar(toolbar);
 
         //set up tabs (fragments one two)
