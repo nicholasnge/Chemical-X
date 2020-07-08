@@ -27,7 +27,6 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.chemicalx.Fragment_Tasks.TaskItemAdapter;
 import com.example.chemicalx.Fragment_Tasks.TaskItemModel;
 import com.example.chemicalx.R;
 import com.google.firebase.auth.FirebaseAuth;
@@ -36,11 +35,8 @@ import com.google.firebase.auth.FirebaseUser;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Comparator;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.PriorityQueue;
 
 
@@ -234,7 +230,7 @@ public class Fragment_Schedule extends Fragment {
         addEventButtonTextView = view.findViewById(R.id.schedule_add_event_button);
         deleteEventsButtonTextView = view.findViewById(R.id.schedule_delete_events_button);
         dateAndDayTextView = view.findViewById(R.id.schedule_date_and_day);
-        timelineRecyclerView = view.findViewById(R.id.schedule_timeline_recycler);
+        timelineRecyclerView = view.findViewById(R.id.todolist_tasks_recycler);
     }
 
     private void initReadCalendarGrantedLayout() {
