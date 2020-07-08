@@ -83,8 +83,8 @@ public class Fragment_Insights extends Fragment {
 
         mUsageListAdapter = new UsageListAdapter();
         appUsageInfos = new ArrayList<>();
-        mOpenUsageSettingButton = (Button) rootView.findViewById(R.id.button_open_usage_setting);
-        mRecyclerView = (RecyclerView) rootView.findViewById(R.id.recyclerview_app_usage);
+        mOpenUsageSettingButton = (Button) rootView.findViewById(R.id.insights_open_usage_setting_button);
+        mRecyclerView = (RecyclerView) rootView.findViewById(R.id.insights_app_usage_recycler);
         mLayoutManager = mRecyclerView.getLayoutManager();
         mRecyclerView.scrollToPosition(0);
         mRecyclerView.setAdapter(mUsageListAdapter);

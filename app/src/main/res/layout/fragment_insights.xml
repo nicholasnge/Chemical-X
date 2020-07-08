@@ -16,7 +16,7 @@
             android:orientation="vertical">
 
             <Button
-                android:id="@+id/button_open_usage_setting"
+                android:id="@+id/insights_open_usage_setting_button"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/open_app_usage_setting"
@@ -29,7 +29,7 @@
                 android:orientation="vertical">
 
                 <LinearLayout
-                    android:id="@+id/usage_pie_chart_layout"
+                    android:id="@+id/insights_usage_pie_chart_layout"
                     android:layout_width="match_parent"
                     android:layout_height="450dp"
                     android:orientation="vertical">
@@ -65,7 +65,7 @@
                     android:textSize="24sp" />
 
                 <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/recyclerview_app_usage"
+                    android:id="@+id/insights_app_usage_recycler"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_marginLeft="@dimen/margin_small"
