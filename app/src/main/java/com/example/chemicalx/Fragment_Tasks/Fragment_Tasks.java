@@ -80,7 +80,7 @@ public class Fragment_Tasks extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_todolist, container, false);
-        recyclerView = view.findViewById(R.id.recyclerView);
+        recyclerView = view.findViewById(R.id.todolist_tasks_recycler);
         getTasks();
 
         //set floating action button to open addTodo

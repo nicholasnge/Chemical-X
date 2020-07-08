@@ -53,6 +53,7 @@ public class DeleteAccountSettingDialogFragment extends DialogFragment {
                 .setMessage(R.string.delete_account_setting_dialog_message)
                 .setPositiveButton(R.string.delete_account_setting_dialog_affirmative,
                         new DialogInterface.OnClickListener() {
+                    @Override
                     public void onClick(DialogInterface dialog, int id) {
                         EditText passwordEditText = view.findViewById(R.id.fragment_dialog_setting_account_delete_password_edittext);
                         String password = passwordEditText.getText().toString();
@@ -61,6 +62,7 @@ public class DeleteAccountSettingDialogFragment extends DialogFragment {
                     }
                 })
                 .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
                     public void onClick(DialogInterface dialog, int id) {
                         listener.onDeleteAccountSettingDialogCancelClick(
                                 DeleteAccountSettingDialogFragment.this);
