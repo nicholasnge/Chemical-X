@@ -1,4 +1,4 @@
-package com.example.chemicalx.Fragment_Todolist;
+package com.example.chemicalx.Fragment_Tasks;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
@@ -17,14 +17,14 @@ import com.example.chemicalx.R;
 
 import java.util.ArrayList;
 
-public class TodoItemAdapter extends RecyclerView.Adapter<TodoItemAdapter.TodoViewHolder> {
+public class TaskItemAdapter extends RecyclerView.Adapter<TaskItemAdapter.TodoViewHolder> {
     Context context;
-    ArrayList<TodoItemModel> todoList;
+    ArrayList<TaskItemModel> todoList;
     int backgroundColor;
     int progressColor;
     LayoutInflater mLayoutInflater = null;
 
-    public TodoItemAdapter(Context context, ArrayList<TodoItemModel> todoList, int backgroundColor, int progressColor){
+    public TaskItemAdapter(Context context, ArrayList<TaskItemModel> todoList, int backgroundColor, int progressColor){
         this.context = context;
         this.todoList = todoList;
         this.backgroundColor = backgroundColor;
@@ -37,12 +37,12 @@ public class TodoItemAdapter extends RecyclerView.Adapter<TodoItemAdapter.TodoVi
         if(mLayoutInflater == null) {
             mLayoutInflater = LayoutInflater.from(parent.getContext());
         }
-        return new TodoItemAdapter.TodoViewHolder(mLayoutInflater.inflate(R.layout.item_todo, parent, false));
+        return new TaskItemAdapter.TodoViewHolder(mLayoutInflater.inflate(R.layout.item_todo, parent, false));
     }
 
     @Override
     public void onBindViewHolder(@NonNull TodoViewHolder holder, int position) {
-        final TodoItemModel todoItemModel = todoList.get(position);
+        final TaskItemModel todoItemModel = todoList.get(position);
         holder.todoTitle.setText(todoItemModel.title);
         holder.progressBar.setProgress(todoItemModel.progressBar);
         holder.progressBar.setProgressTintList(ColorStateList.valueOf(context.getResources().getColor(progressColor)));

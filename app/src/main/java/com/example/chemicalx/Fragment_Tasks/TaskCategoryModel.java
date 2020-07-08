@@ -1,14 +1,14 @@
-package com.example.chemicalx.Fragment_Todolist;
+package com.example.chemicalx.Fragment_Tasks;
 
 import java.util.ArrayList;
 
-public class TodoCategoryModel {
+public class TaskCategoryModel {
     String title;
-    ArrayList<TodoItemModel> todoList;
+    ArrayList<TaskItemModel> todoList;
     int backgroundColor;
     int progressColor;
 
-    public TodoCategoryModel(String title, ArrayList<TodoItemModel> todoList, int backgroundColor, int progressColor) {
+    public TaskCategoryModel(String title, ArrayList<TaskItemModel> todoList, int backgroundColor, int progressColor) {
         this.title = title;
         this.todoList = todoList;
         this.backgroundColor = backgroundColor;

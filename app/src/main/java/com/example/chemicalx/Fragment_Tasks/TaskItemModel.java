@@ -1,14 +1,12 @@
-package com.example.chemicalx.Fragment_Todolist;
+package com.example.chemicalx.Fragment_Tasks;
 
-import android.widget.ProgressBar;
-
-public class TodoItemModel {
+public class TaskItemModel {
     String title;
     int totalTime;
     int timePassed;
     int progressBar;
 
-    public TodoItemModel(String title, int totalTime, int timePassed) {
+    public TaskItemModel(String title, int totalTime, int timePassed) {
         this.title = title;
         this.totalTime = totalTime;
         this.timePassed = timePassed;
@@ -16,7 +14,7 @@ public class TodoItemModel {
     }
 
     // temporary fix
-    public TodoItemModel(String title, int totalTime) {
+    public TaskItemModel(String title, int totalTime) {
         this.title = title;
         this.totalTime = totalTime;
         this.timePassed = 0;

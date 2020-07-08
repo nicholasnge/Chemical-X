@@ -28,7 +28,7 @@ import java.util.List;
 
 import com.example.chemicalx.Fragment_Schedule.Fragment_Schedule;
 import com.example.chemicalx.Fragment_Schedule.ReadCalendarPermissionDialogFragment;
-import com.example.chemicalx.Fragment_Todolist.Fragment_Todolist;
+import com.example.chemicalx.Fragment_Tasks.Fragment_Tasks;
 import com.example.chemicalx.Fragment_Insights.Fragment_Insights;
 import com.example.chemicalx.settings.SettingsActivity;
 import com.firebase.ui.auth.AuthUI;
@@ -149,7 +149,7 @@ public class MainActivity extends AppCompatActivity
     private void setupViewPager(ViewPager viewPager) {
         viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager());
         viewPagerAdapter.addFragment(schedule, "SCHEDULE");
-        viewPagerAdapter.addFragment(new Fragment_Todolist(), "TASKS");
+        viewPagerAdapter.addFragment(new Fragment_Tasks(), "TASKS");
         viewPagerAdapter.addFragment(new Fragment_Insights(), "INSIGHTS");
         viewPager.setAdapter(viewPagerAdapter);
     }

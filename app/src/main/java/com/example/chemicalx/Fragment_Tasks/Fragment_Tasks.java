@@ -1,4 +1,4 @@
-package com.example.chemicalx.Fragment_Todolist;
+package com.example.chemicalx.Fragment_Tasks;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -21,15 +21,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class Fragment_Todolist extends Fragment {
+public class Fragment_Tasks extends Fragment {
     FirebaseFirestore db;
-    private ArrayList<TodoCategoryModel> mDataList = new ArrayList<>();
-    private TodoCategoryAdapter mAdapter;
+    private ArrayList<TaskCategoryModel> mDataList = new ArrayList<>();
+    private TaskCategoryAdapter mAdapter;
     private LinearLayoutManager mLayoutManager;
     RecyclerView recyclerView;
     FloatingActionButton fab;
 
-    public Fragment_Todolist() {
+    public Fragment_Tasks() {
         //required empty public constructor
     }
 
@@ -52,7 +52,7 @@ public class Fragment_Todolist extends Fragment {
         button.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
-                DialogFragment addTodo = new AddTodo();
+                DialogFragment addTodo = new AddTask();
                 addTodo.show(getChildFragmentManager(), "tag");
             }
         });
@@ -75,25 +75,25 @@ public class Fragment_Todolist extends Fragment {
                         }
             }
         });
-        ArrayList<TodoItemModel> todoWork = new ArrayList<>();
-        todoWork.add(new TodoItemModel("Finish Orbital Project", 30));
-        todoWork.add(new TodoItemModel("Revise for CFA exam before December", 70));
-        todoWork.add(new TodoItemModel("Study for CS3230", 45));
+        ArrayList<TaskItemModel> todoWork = new ArrayList<>();
+        todoWork.add(new TaskItemModel("Finish Orbital Project", 30));
+        todoWork.add(new TaskItemModel("Revise for CFA exam before December", 70));
+        todoWork.add(new TaskItemModel("Study for CS3230", 45));
 
-        ArrayList<TodoItemModel> todoRecreation = new ArrayList<>();
-        todoRecreation.add(new TodoItemModel("Not play TFT for the rest of my life please", 30));
-        todoRecreation.add(new TodoItemModel("Play Android Studio", 70));
-        todoRecreation.add(new TodoItemModel("Reach Masters in 2v2 Starcraft", 45));
+        ArrayList<TaskItemModel> todoRecreation = new ArrayList<>();
+        todoRecreation.add(new TaskItemModel("Not play TFT for the rest of my life please", 30));
+        todoRecreation.add(new TaskItemModel("Play Android Studio", 70));
+        todoRecreation.add(new TaskItemModel("Reach Masters in 2v2 Starcraft", 45));
 
-        ArrayList<TodoItemModel> todoHobby = new ArrayList<>();
-        todoHobby.add(new TodoItemModel("Practice piano for Diya's piano piece", 30));
-        todoHobby.add(new TodoItemModel("Edit video for Summer Wind", 70));
-        todoHobby.add(new TodoItemModel("Learn how to paint with Bob Ross", 45));
+        ArrayList<TaskItemModel> todoHobby = new ArrayList<>();
+        todoHobby.add(new TaskItemModel("Practice piano for Diya's piano piece", 30));
+        todoHobby.add(new TaskItemModel("Edit video for Summer Wind", 70));
+        todoHobby.add(new TaskItemModel("Learn how to paint with Bob Ross", 45));
 
         mDataList.clear();
-        mDataList.add(new TodoCategoryModel("Work", todoWork, R.color.MaterialBlue50, R.color.MaterialBlue100));
-        mDataList.add(new TodoCategoryModel("Recreation", todoRecreation, R.color.MaterialGreen50, R.color.MaterialGreen100));
-        mDataList.add(new TodoCategoryModel("Hobby", todoHobby, R.color.MaterialRed50, R.color.MaterialRed100));
+        mDataList.add(new TaskCategoryModel("Work", todoWork, R.color.MaterialBlue50, R.color.MaterialBlue100));
+        mDataList.add(new TaskCategoryModel("Recreation", todoRecreation, R.color.MaterialGreen50, R.color.MaterialGreen100));
+        mDataList.add(new TaskCategoryModel("Hobby", todoHobby, R.color.MaterialRed50, R.color.MaterialRed100));
     }
 
     private void initRecyclerView() {
@@ -104,7 +104,7 @@ public class Fragment_Todolist extends Fragment {
             }
         };
         recyclerView.setLayoutManager(mLayoutManager);
-        mAdapter = new TodoCategoryAdapter(getActivity(), mDataList);
+        mAdapter = new TaskCategoryAdapter(getActivity(), mDataList);
         recyclerView.setAdapter(mAdapter);
     }
 
