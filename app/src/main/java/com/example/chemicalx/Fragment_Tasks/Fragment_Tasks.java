@@ -14,6 +14,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.chemicalx.Fragment_Schedule.Fragment_Schedule;
 import com.example.chemicalx.R;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -26,17 +27,21 @@ import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.PriorityQueue;
 import java.util.Timer;
 import java.util.TimerTask;
 
 
 public class Fragment_Tasks extends Fragment {
+    Fragment_Schedule fragment_schedule;
     public final static String TAG = "Fragment_Todolist";
     FirebaseFirestore db;
     private ArrayList<TaskCategoryModel> mDataList = new ArrayList<>();
+    PriorityQueue<TaskItemModel> taskItemQueue;
     private TaskCategoryAdapter mAdapter;
     private LinearLayoutManager mLayoutManager;
     RecyclerView recyclerView;
@@ -60,8 +65,9 @@ public class Fragment_Tasks extends Fragment {
     public static final int selectedProgressColor = R.color.colorSecondary;
     public static final int selectedBackgroundColor = R.color.colorSecondaryLight;
 
-    public Fragment_Tasks() {
-        //required empty public constructor
+    public Fragment_Tasks(Fragment_Schedule schedule) {
+        //create reference to schedule fragment for passing of data
+        fragment_schedule = schedule;
     }
 
     @Override
@@ -94,6 +100,18 @@ public class Fragment_Tasks extends Fragment {
         final ArrayList<TaskItemModel> tasksWork = new ArrayList<>();
         final ArrayList<TaskItemModel> tasksRecreation = new ArrayList<>();
         final ArrayList<TaskItemModel> tasksHobby = new ArrayList<>();
+        taskItemQueue = new PriorityQueue<>(new Comparator<TaskItemModel>() {
+            @Override
+            public int compare(TaskItemModel o1, TaskItemModel o2) {
+                if (o1.dueDate == null){
+                    return -1; // o2 is more urgent
+                }
+                if (o2.dueDate == null){
+                    return 1; // o1 is more urgent
+                }
+                return -o1.dueDate.compareTo(o2.dueDate);
+            }
+        });
 
         //format the array into a taskcategorymodel
         mDataList.clear();
@@ -143,12 +161,16 @@ public class Fragment_Tasks extends Fragment {
                                         default:
                                             Log.e(TAG, "snapshot: no such category");
                                     }
+                                    //add task to priorityqueue
+                                    taskItemQueue.add(task);
+
                                     // find the taskItemAdapter responsible for updating its recyclerview
                                     TaskItemAdapter adapter = mAdapter.taskItemAdapters.get(snapshot.getString("category"));
                                     adapter.notifyItemInserted(adapter.taskList.size());
                                     mAdapter.notifyChange(snapshot.getString("category"));
                                 }
                             }
+                            fragment_schedule.addTasks(taskItemQueue);
                         }
                     }
                 });

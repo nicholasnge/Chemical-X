@@ -149,7 +149,7 @@ public class MainActivity extends AppCompatActivity
     private void setupViewPager(ViewPager viewPager) {
         viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager());
         viewPagerAdapter.addFragment(schedule, "SCHEDULE");
-        viewPagerAdapter.addFragment(new Fragment_Tasks(), "TASKS");
+        viewPagerAdapter.addFragment(new Fragment_Tasks(schedule), "TASKS");
         viewPagerAdapter.addFragment(new Fragment_Insights(), "INSIGHTS");
         viewPager.setAdapter(viewPagerAdapter);
     }
@@ -160,9 +160,6 @@ public class MainActivity extends AppCompatActivity
 
         switch (id){
             case R.id.logOut:
-//                sign out using google api (jay version)
-//                signOut();
-
                 //sign out using firebase
                 AuthUI.getInstance().signOut(this);
                 break;

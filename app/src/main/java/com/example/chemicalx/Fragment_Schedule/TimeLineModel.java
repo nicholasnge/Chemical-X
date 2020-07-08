@@ -3,22 +3,25 @@ package com.example.chemicalx.Fragment_Schedule;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class TimeLineModel {
+public class TimeLineModel implements Comparable<TimeLineModel>{
     String message;
-    String date;
     long dtstart;
+    long dtend;
     OrderStatus status;
+    boolean isFromTasks = false;
 
-    public TimeLineModel (String message, String date, OrderStatus status) {
-        this.message = message;
-        this.date = date;
-        this.status = status;
-    }
-
-    public TimeLineModel (String message, long dtstart, OrderStatus status) {
+    public TimeLineModel (String message, long dtstart, long dtend, OrderStatus status) {
         this.message = message;
         this.dtstart = dtstart;
+        this.dtend = dtend;
         this.status = status;
+    }
+    public TimeLineModel (String message, long dtstart, long dtend, OrderStatus status, boolean isFromTasks) {
+        this.message = message;
+        this.dtstart = dtstart;
+        this.dtend = dtend;
+        this.status = status;
+        this.isFromTasks = isFromTasks;
     }
 
     public String getMessage() {
@@ -37,23 +40,8 @@ public class TimeLineModel {
         return simpleDateFormat.format(date);
     }
 
-    public void setDate(String date) {
-        this.date = date;
-    }
-
-    public long getDtstart() {
-        return dtstart;
-    }
-
-    public void setDtstart(long dtstart) {
-        this.dtstart = dtstart;
-    }
-
-    public OrderStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(OrderStatus status) {
-        this.status = status;
+    @Override
+    public int compareTo(TimeLineModel o) {
+        return (int) (this.dtstart - o.dtstart);
     }
 }

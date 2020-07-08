@@ -18,12 +18,16 @@ public class TaskItemModel {
         this.category = category;
         this.totalTime = totalTime;
         this.timePassed = timePassed;
-        this.progressBar = timePassed*100 / totalTime;
+        this.progressBar = timePassed * 100 / totalTime;
         this.dueDate = dueDate;
     }
 
-    public void incrementProgress(){
-        this.timePassed +=1;
-        this.progressBar = timePassed*100 / totalTime ;
+    public void incrementProgress() {
+        this.timePassed += 1;
+        this.progressBar = timePassed * 100 / totalTime;
+    }
+
+    public String getTitle() {
+        return title;
     }
 }

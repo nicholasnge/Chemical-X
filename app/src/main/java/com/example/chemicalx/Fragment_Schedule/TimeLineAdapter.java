@@ -1,5 +1,6 @@
 package com.example.chemicalx.Fragment_Schedule;
 
+import android.content.res.ColorStateList;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,11 +13,13 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.github.vipulasri.timelineview.TimelineView;
 import com.example.chemicalx.R;
 import com.example.chemicalx.VectorDrawableUtils;
+import com.google.android.material.card.MaterialCardView;
 
 
 import java.util.List;
 
 class TimeLineAdapter extends RecyclerView.Adapter<TimeLineAdapter.TimeLineViewHolder> {
+    ViewGroup parent;
     List<TimeLineModel> mFeedList;
     LayoutInflater mLayoutInflater = null;
 
@@ -33,6 +36,7 @@ class TimeLineAdapter extends RecyclerView.Adapter<TimeLineAdapter.TimeLineViewH
     @NonNull
     @Override
     public TimeLineViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType){
+        this.parent = parent;
         if(mLayoutInflater == null) {
             mLayoutInflater = LayoutInflater.from(parent.getContext());
         }
@@ -43,7 +47,7 @@ class TimeLineAdapter extends RecyclerView.Adapter<TimeLineAdapter.TimeLineViewH
     public void onBindViewHolder(@NonNull TimeLineViewHolder holder, int position) {
         TimeLineModel timeLineModel = mFeedList.get(position);
 
-        switch(timeLineModel.getStatus()){
+        switch(timeLineModel.status){
             case INACTIVE:
                 setMarker(holder, R.drawable.ic_marker_inactive, R.color.Grey);
                 break;
@@ -63,6 +67,10 @@ class TimeLineAdapter extends RecyclerView.Adapter<TimeLineAdapter.TimeLineViewH
         }
 
         holder.message.setText(timeLineModel.getMessage());
+
+        if(timeLineModel.isFromTasks){
+            holder.timelineCard.setCardBackgroundColor(parent.getResources().getColor(R.color.MaterialGreen100));
+        }
     }
 
     private void setMarker(TimeLineViewHolder holder, int drawableRestId, int colorFilter){
@@ -78,6 +86,7 @@ class TimeLineAdapter extends RecyclerView.Adapter<TimeLineAdapter.TimeLineViewH
         final TextView date;
         final TextView message;
         final TimelineView timeline;
+        final MaterialCardView timelineCard;
 
         public TimeLineViewHolder(@NonNull View itemView, int viewType) {
             super(itemView);
@@ -85,6 +94,7 @@ class TimeLineAdapter extends RecyclerView.Adapter<TimeLineAdapter.TimeLineViewH
             message = itemView.findViewById(R.id.text_timeline_title);
             timeline = itemView.findViewById(R.id.timeline);
             timeline.initLine(viewType);
+            timelineCard = itemView.findViewById(R.id.timelineCard);
         }
     }
 }
