@@ -37,11 +37,11 @@
             android:orientation="vertical">
 
             <androidx.appcompat.widget.AppCompatTextView
-                android:id="@+id/text_timeline_date"
+                android:id="@+id/text_timeline_date_time"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textSize="14sp"
-                tools:text="24 JAN" />
+                tools:text="insert timeline date and/or time here" />
 
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/text_timeline_title"
@@ -49,7 +49,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="5dp"
                 android:textColor="@android:color/black"
-                tools:text="Order Successfully Completed" />
+                tools:text="insert timeline item title here" />
 
         </LinearLayout>
 

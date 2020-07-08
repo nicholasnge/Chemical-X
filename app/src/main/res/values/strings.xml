@@ -40,11 +40,34 @@
     <string name="delete_account_setting_dialog_affirmative">"Delete account"</string>
     <string name="cancel">"Cancel"</string>
 
-    <string name="schedule_read_calendar_disabled_msg">"The schedule tab is disabled because the permission may not be granted for Chemical X to read from your Calendar.\n\nIf you want to grant the permission manually, go to\nSettings > Apps > Chemical X > App Settings: Permissions\nand tap on Calendar.\n\nTap the button below if you want to go straight to the Chemical X page in your device settings."</string>
+    <string name="schedule_read_calendar_disabled_text">"The schedule tab is disabled because the permission may not be granted for Chemical X to read from your Calendar.\n\nIf you want to grant the permission manually, go to\nSettings > Apps > Chemical X > App Settings: Permissions\nand tap on Calendar.\n\nTap the button below if you want to go straight to the Chemical X page in your device settings."</string>
     <string name="schedule_read_calendar_disabled_grant_permission_button_text">"Chemical X Device Settings"</string>
 
     <string name="schedule_read_calendar_permission_dialog_title">"Read Calendar Permission Required"</string>
     <string name="schedule_read_calendar_permission_dialog_message">"Your permission to read from the Calendar is required in order to display its events in the schedule tab.\n\nWould you like to grant the permission?"</string>
     <string name="schedule_read_calendar_permission_dialog_positive_button_text">"Grant permission"</string>
     <string name="schedule_read_calendar_permission_dialog_negative_button_text">"No thanks"</string>
+
+    <string name="schedule_add_event_button_text">"Add"</string>
+    <string name="schedule_delete_events_button_text">"Delete"</string>
+
+    <string name="schedule_add_event_dialog_title">"Add Event"</string>
+    <string name="schedule_add_event_dialog_positive_button_text">"Add"</string>
+    <string name="schedule_add_event_dialog_neutral_button_text">"More options"</string>
+    <string name="field_title_hint">"Title"</string>
+    <string name="schedule_add_event_dialog_event_all_day_switch_text">"All day"</string>
+    <string name="field_start_datetime_hint">"Start"</string>
+    <string name="field_end_datetime_hint">"End"</string>
+    <string-array name="field_recurrence_rule_array">
+        <item>"Never repeat"</item>
+        <item>"Daily"</item>
+        <item>"Weekly"</item>
+        <item>"Monthly"</item>
+        <item>"Yearly"</item>
+    </string-array>
+    <string name="schedule_add_event_dialog_write_calendar_disabled_text">"Adding events to your Calendar directly from Chemical X is disabled because the permission may not be granted.\n\nIf you want to grant the permission manually, go to\nSettings > Apps > Chemical X > App Settings: Permissions\nand tap on Calendar.\n\nTap the button below if you want to go straight to the Chemical X page in your device settings."</string>
+    <string name="schedule_add_event_dialog_write_calendar_grant_permission_button_text">"Grant permission"</string>
+
+    <string name="add_event_update_datetime_dialog_title">"Update Date and/or Time"</string>
+    <string name="add_event_update_datetime_dialog_positive_button_text">"Update"</string>
 </resources>

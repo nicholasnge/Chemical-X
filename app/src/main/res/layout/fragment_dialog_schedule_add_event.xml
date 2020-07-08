@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="20dp">
+
+    <EditText
+        android:id="@+id/add_event_dialog_event_title_edittext"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="@string/field_title_hint"
+        android:inputType="text" />
+
+    <Switch
+        android:id="@+id/add_event_dialog_event_all_day_switch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/schedule_add_event_dialog_event_all_day_switch_text" />
+
+    <EditText
+        android:id="@+id/add_event_dialog_event_start_datetime_edittext"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="@string/field_start_datetime_hint"
+        android:inputType="datetime" />
+
+    <EditText
+        android:id="@+id/add_event_dialog_event_end_datetime_edittext"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="@string/field_end_datetime_hint"
+        android:inputType="datetime" />
+
+    <Spinner
+        android:id="@+id/add_event_dialog_event_recurrence_spinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <LinearLayout
+        android:id="@+id/add_event_dialog_write_calendar_disabled_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/add_event_dialog_write_calendar_disabled_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/schedule_add_event_dialog_write_calendar_disabled_text" />
+
+        <Button
+            android:id="@+id/add_event_dialog_write_calendar_grant_permission_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/schedule_add_event_dialog_write_calendar_grant_permission_button_text" />
+    </LinearLayout>
+
+</LinearLayout>
