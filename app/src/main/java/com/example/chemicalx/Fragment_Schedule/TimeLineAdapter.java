@@ -103,7 +103,7 @@ class TimeLineAdapter extends RecyclerView.Adapter<TimeLineAdapter.TimeLineViewH
 
         public TimeLineViewHolder(@NonNull View itemView, int viewType) {
             super(itemView);
-            date = itemView.findViewById(R.id.text_timeline_date);
+            date = itemView.findViewById(R.id.text_timeline_date_time);
             message = itemView.findViewById(R.id.text_timeline_title);
             timeline = itemView.findViewById(R.id.timeline);
             timeline.initLine(viewType);
