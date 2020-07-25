@@ -16,10 +16,12 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -94,8 +96,7 @@ public class Fragment_Insights extends Fragment {
         updatePieChart();
 
         // update productivity advice text
-        adviceText.setText("You are more productive after feeding Diglet.\t"
-                + "You are less productive after writing an essay.");
+        adviceText.setText("You have used Instagram for 54 minutes this week!");
     }
 
     private void getUsageStats() {
@@ -209,7 +210,7 @@ public class Fragment_Insights extends Fragment {
 
         // if got error, check if user has given permission
         if (map.keySet().size() == 0) {
-            Log.i(TAG, "The user may not allow the access to apps usage. ");
+            Log.i(TAG, "The user may not allow the access to apps usage.");
             Toast.makeText(getActivity(),
                     getString(R.string.explanation_access_to_appusage_is_not_enabled),
                     Toast.LENGTH_LONG).show();
@@ -247,6 +248,7 @@ public class Fragment_Insights extends Fragment {
         usagePieChart.setTouchEnabled(false);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     private void updatePieChart() {
         // update the data
         usagePieChart.setData(generatePieData());
@@ -255,6 +257,7 @@ public class Fragment_Insights extends Fragment {
         usagePieChart.invalidate();
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     private PieData generatePieData() {
         // total usage times for different categories
         long[] categoryTotalUsage = new long[NUM_OF_CATEGORIES];
@@ -288,21 +291,22 @@ public class Fragment_Insights extends Fragment {
         PieDataSet pieDataSet = new PieDataSet(pieEntries, "");
         // pie chart slice colours
         List<Integer> colours = new ArrayList<>();
-        colours.add(Color.rgb(255, 0, 0));
-        colours.add(Color.rgb(255, 127, 0));
-        colours.add(Color.rgb(255, 255, 0));
-        colours.add(Color.rgb(127, 255, 0));
-        colours.add(Color.rgb(0, 255, 0));
-        colours.add(Color.rgb(0, 255, 255));
-        colours.add(Color.rgb(0, 0, 255));
-        colours.add(Color.rgb(127, 0, 255));
-        colours.add(Color.rgb(255, 0, 255));
+        colours.add(getResources().getColor(R.color.MaterialBlue300));
+        colours.add(getResources().getColor(R.color.MaterialRed300));
+        colours.add(getResources().getColor(R.color.MaterialGreen300));
+        colours.add(getResources().getColor(R.color.MaterialDeepPurple300));
+        colours.add(getResources().getColor(R.color.MaterialOrange300));
+        colours.add(getResources().getColor(R.color.MaterialTeal300));
+        colours.add(getResources().getColor(R.color.MaterialYellow300));
+        colours.add(getResources().getColor(R.color.MaterialBrown300));
+        colours.add(getResources().getColor(R.color.MaterialCyan300));
         pieDataSet.setColors(colours);
         // move percentage labels to outside the slice to make it neater
-        pieDataSet.setXValuePosition(PieDataSet.ValuePosition.OUTSIDE_SLICE);
-        pieDataSet.setYValuePosition(PieDataSet.ValuePosition.OUTSIDE_SLICE);
+        pieDataSet.setXValuePosition(PieDataSet.ValuePosition.INSIDE_SLICE);
+        pieDataSet.setYValuePosition(PieDataSet.ValuePosition.INSIDE_SLICE);
 
         PieData pieData = new PieData(pieDataSet);
+        pieDataSet.setValueTextSize(25);
 
         return pieData;
     }

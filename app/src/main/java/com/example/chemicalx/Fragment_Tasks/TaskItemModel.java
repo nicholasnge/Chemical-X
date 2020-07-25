@@ -1,5 +1,6 @@
 package com.example.chemicalx.Fragment_Tasks;
 
+import com.example.chemicalx.Category;
 import com.google.firebase.Timestamp;
 
 public class TaskItemModel {
@@ -30,4 +31,5 @@ public class TaskItemModel {
     public String getTitle() {
         return title;
     }
+    public String getCategory(){ return category;}
 }

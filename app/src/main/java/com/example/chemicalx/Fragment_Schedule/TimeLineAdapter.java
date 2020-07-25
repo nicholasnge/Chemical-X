@@ -58,10 +58,10 @@ class TimeLineAdapter extends RecyclerView.Adapter<TimeLineAdapter.TimeLineViewH
                 setMarker(holder, R.drawable.ic_marker, R.color.Grey);
         }
 
-        if(!timeLineModel.getDate().isEmpty()){
+        if(!timeLineModel.getStartDate().isEmpty()){
             holder.date.setVisibility(View.VISIBLE);
             // original version formats this string
-            holder.date.setText(timeLineModel.getDate());
+            holder.date.setText(timeLineModel.getStartDate() + " - " + timeLineModel.getEndDate() + " (" + timeLineModel.category + ")");
         } else {
             holder.date.setVisibility(View.GONE);
         }
@@ -69,7 +69,20 @@ class TimeLineAdapter extends RecyclerView.Adapter<TimeLineAdapter.TimeLineViewH
         holder.message.setText(timeLineModel.getMessage());
 
         if(timeLineModel.isFromTasks){
-            holder.timelineCard.setCardBackgroundColor(parent.getResources().getColor(R.color.MaterialGreen100));
+            switch(timeLineModel.category){
+                case "Work":
+                    holder.timelineCard.setCardBackgroundColor(parent.getResources().getColor(R.color.MaterialBlue50));
+                    break;
+                case "Hobbies":
+                    holder.timelineCard.setCardBackgroundColor(parent.getResources().getColor(R.color.MaterialRed50));
+                    break;
+                case "School":
+                    holder.timelineCard.setCardBackgroundColor(parent.getResources().getColor(R.color.MaterialGreen50));
+                    break;
+                case "Chores":
+                    holder.timelineCard.setCardBackgroundColor(parent.getResources().getColor(R.color.MaterialYellow50));
+                    break;
+            }
         }
     }
 

@@ -9,6 +9,7 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.provider.CalendarContract;
 import android.provider.Settings;
 import android.util.Log;
@@ -25,9 +26,11 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.chemicalx.Category;
 import com.example.chemicalx.Fragment_Tasks.TaskItemAdapter;
 import com.example.chemicalx.Fragment_Tasks.TaskItemModel;
 import com.example.chemicalx.R;
+import com.example.chemicalx.TextClassificationClient;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -49,6 +52,9 @@ public class Fragment_Schedule extends Fragment {
     private LinearLayout readCalendarDeniedLayout;
     private LinearLayout readCalendarGrantedLayout;
     private Button grantReadCalendarPermissionButton;
+
+    //for tf model
+    TextClassificationClient tf_classifytasks;
 
     // for calendar permissions handling
     public static final int READ_CALENDAR_PERMISSION_REQUEST_CODE = 0;
@@ -72,8 +78,8 @@ public class Fragment_Schedule extends Fragment {
     private static final int PROJECTION_BEGIN_INDEX = 1;
     private static final int PROJECTION_END_INDEX = 2;
 
-    public Fragment_Schedule() {
-        // Required empty public constructor
+    public Fragment_Schedule(TextClassificationClient tf_classifytasks) {
+        this.tf_classifytasks = tf_classifytasks;
     }
 
     @Override
@@ -143,11 +149,14 @@ public class Fragment_Schedule extends Fragment {
             long dtstart; // UTC ms since the start of the epoch
             long dtend;
             OrderStatus status;
+            String category;
 
             // Get the field values
             title = cur.getString(PROJECTION_TITLE_INDEX);
             dtstart = cur.getLong(PROJECTION_BEGIN_INDEX);
             dtend = cur.getLong(PROJECTION_END_INDEX);
+
+            category = tf_classifytasks.classify(title);
 
             // processing of values
             // temporary placeholder status for now
@@ -160,20 +169,8 @@ public class Fragment_Schedule extends Fragment {
             }
 
             // add to data list
-            mDataList.add(new TimeLineModel(title, dtstart, dtend, status));
+            mDataList.add(new TimeLineModel(title, dtstart, dtend, status, category));
         }
-
-        // saving these for now for future debugging purposes
-//        mDataList.add(new TimeLineModel("CS2030 Lecture", "10:00 AM", OrderStatus.COMPLETED));
-//        mDataList.add(new TimeLineModel("CS2040 Tutorial", "12:00 PM", OrderStatus.COMPLETED));
-//        mDataList.add(new TimeLineModel("Lunch", "1:30 PM", OrderStatus.COMPLETED));
-//        mDataList.add(new TimeLineModel("Work - Recreation remaining: -4 min", "2:00 PM", OrderStatus.COMPLETED));
-//        mDataList.add(new TimeLineModel("Dinner Break", "6:30 PM", OrderStatus.COMPLETED));
-//        mDataList.add(new TimeLineModel("UTW1702B Recitation", "8:00 PM", OrderStatus.ACTIVE));
-//        mDataList.add(new TimeLineModel("Work - Recreation remaining: 90 min", "9:30 PM", OrderStatus.INACTIVE));
-//        mDataList.add(new TimeLineModel("Sleep - Overdue by: 0 min", "12:30 AM", OrderStatus.INACTIVE));
-//        mDataList.add(new TimeLineModel("Work - Recreation remaining: 90 min", "9:30 PM", OrderStatus.INACTIVE));
-//        mDataList.add(new TimeLineModel("Sleep - Overdue by: 0 min", "12:30 AM", OrderStatus.INACTIVE));
 
         // move earlier events nearer to the start of the list
         mDataList.sort(null);
@@ -284,11 +281,13 @@ public class Fragment_Schedule extends Fragment {
             // this is a temporary condition, replaced by our AI stuff when we finish it.
             boolean eventNotOver = now.getTimeInMillis() < currentItem.dtend;
             boolean taskQueueSizeSufficient = taskItemQueue.size() > 0;
+            Log.d(nextItem.dtstart -currentItem.dtend + "", currentItem.dtend+ "");
             boolean atLeast1Hour = nextItem.dtstart - currentItem.dtend >= one_hour;
             boolean atMost3Hours = nextItem.dtstart - currentItem.dtend <= one_hour*3;
+            Log.d(currentItem.message, eventNotOver + " " + taskQueueSizeSufficient + " " + atLeast1Hour + " " + atMost3Hours);
             if (eventNotOver && taskQueueSizeSufficient && atLeast1Hour && atMost3Hours){
                 TaskItemModel t = taskItemQueue.remove();
-                timeLineModel = new TimeLineModel(t.getTitle(), mDataList.get(i).dtend, mDataList.get(i+1).dtstart, OrderStatus.INACTIVE, true);
+                timeLineModel = new TimeLineModel(t.getTitle(), mDataList.get(i).dtend, mDataList.get(i+1).dtstart, OrderStatus.INACTIVE, t.getCategory(), true);
                 toBeAdded.add(timeLineModel);
             }
         }

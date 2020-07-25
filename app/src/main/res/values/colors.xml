@@ -11,18 +11,32 @@
 
     <color name="MaterialRed50">#ffebee</color>
     <color name="MaterialRed100">#ffcdd2 </color>
-    <color name="MaterialPurple50">#f3e5f5</color>
-    <color name="MaterialPurple100">#e1bee7 </color>
+    <color name="MaterialRed300">#e57373 </color>
+    <color name="MaterialDeepPurple50">#ede7f6</color>
+    <color name="MaterialDeepPurple100">#d1c4e9 </color>
+    <color name="MaterialDeepPurple300">#9575cd </color>
     <color name="MaterialBlue50">#e3f2fd</color>
     <color name="MaterialBlue100">#bbdefb </color>
+    <color name="MaterialBlue300">#64b5f6 </color>
     <color name="MaterialTeal50">#e0f2f1</color>
     <color name="MaterialTeal100">#b2dfdb </color>
+    <color name="MaterialTeal300">#4db6ac </color>
     <color name="MaterialGreen50">#e8f5e9</color>
     <color name="MaterialGreen100">#c8e6c9 </color>
+    <color name="MaterialGreen300">#81c784 </color>
     <color name="MaterialYellow50">#fffde7</color>
     <color name="MaterialYellow100">#fff9c4 </color>
+    <color name="MaterialYellow300">#fff176 </color>
     <color name="MaterialOrange50">#fff3e0</color>
     <color name="MaterialOrange100">#ffe0b2 </color>
+    <color name="MaterialOrange300">#ffb74d </color>
+    <color name="MaterialCyan50">#e0f7fa</color>
+    <color name="MaterialCyan100">#b2ebf2 </color>
+    <color name="MaterialCyan300">#80deea </color>
+    <color name="MaterialBrown50">#efebe9</color>
+    <color name="MaterialBrown100">#d7ccc8 </color>
+    <color name="MaterialBrown300">#bcaaa4 </color>
+
 
     <color name="scheduleLineColor">#c8e8ff</color>
 

@@ -24,6 +24,7 @@ import androidx.fragment.app.DialogFragment;
 import com.example.chemicalx.Fragment_Tasks.crollerTest.Croller;
 import com.example.chemicalx.Fragment_Tasks.crollerTest.OnCrollerChangeListener;
 import com.example.chemicalx.R;
+import com.example.chemicalx.TextClassificationClient;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.snackbar.BaseTransientBottomBar;
@@ -53,8 +54,11 @@ public class AddTask extends DialogFragment {
     Button createTaskButton;
     int durationHours;
     int durationTenMinutes;
+    //for tf model
+    TextClassificationClient tf_classifytasks;
 
-    public AddTask() {
+    public AddTask(TextClassificationClient tf_classifytasks) {
+        this.tf_classifytasks = tf_classifytasks;
     }
 
     @Override
@@ -127,14 +131,20 @@ public class AddTask extends DialogFragment {
                     Snackbar.make(view, "Your task needs a title!", BaseTransientBottomBar.LENGTH_SHORT).show();
                     return;
                 }
+
                 //pass data back
                 Map<String, Object> task = new HashMap<>();
                 task.put("title", taskTitle.getText().toString());
-                task.put("category", categorySpinner.getSelectedItem().toString());
                 task.put("totalTime", getSeconds(croller.getProgress()));
                 task.put("timePassed", 0);
                 if (taskDueDate != null) {
                     task.put("dueDate", new Timestamp(taskDueDate));
+                }
+                // let tf choose category for user if tf specifies so
+                if (categorySpinner.getSelectedItem().toString().equals("What do you think?")){
+                    task.put("category", tf_classifytasks.classify(taskTitle.getText().toString()));
+                } else {
+                    task.put("category", categorySpinner.getSelectedItem().toString());
                 }
 
                 db.collection("users")

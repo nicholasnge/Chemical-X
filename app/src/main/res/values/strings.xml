@@ -28,9 +28,11 @@
     <string name="usage_pie_chart_title">"App Usage Summary"</string>
 
     <string-array name="todo_categories">
+        <item>What do you think?</item>
         <item>Work</item>
-        <item>Recreation</item>
-        <item>Hobby</item>
+        <item>Hobbies</item>
+        <item>School</item>
+        <item>Chores</item>
     </string-array>
 
     <string name="delete_account_setting_dialog_title">"Delete Account?"</string>

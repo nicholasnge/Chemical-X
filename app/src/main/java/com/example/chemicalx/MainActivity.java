@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.MenuItem;
@@ -61,18 +62,25 @@ public class MainActivity extends AppCompatActivity
 
     private Fragment_Schedule schedule;
 
+    //for tf model
+    public TextClassificationClient tf_classifytasks;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         // set view to activity main
         setContentView(R.layout.activity_main);
 
+        //initialise task classifier tf
+        tf_classifytasks = new TextClassificationClient(this);
+        tf_classifytasks.load();
+
         //mount toolbar
         toolbar = (Toolbar) findViewById(R.id.addTaskToolbar);
         setSupportActionBar(toolbar);
 
-        //set up tabs (fragments one two)
-        schedule = new Fragment_Schedule();
+        //set up tabs (fragments)
+        schedule = new Fragment_Schedule(tf_classifytasks);
         viewPager = (ViewPager) findViewById(R.id.viewpager);
         setupViewPager(viewPager);
         tabLayout = (TabLayout) findViewById(R.id.tabs);
@@ -92,14 +100,14 @@ public class MainActivity extends AppCompatActivity
                 getSystemService(Context.APP_OPS_SERVICE);
         int mode = appOps.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS,
                 android.os.Process.myUid(), getPackageName());
-        if (mode != AppOpsManager.MODE_ALLOWED){
+        if (mode != AppOpsManager.MODE_ALLOWED) {
             startActivityForResult(new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS), APPUSAGE_REQUEST_CODE);
         }
 
         //check if there's permission for calendar
         mode = appOps.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS,
                 android.os.Process.myUid(), getPackageName());
-        if (mode != AppOpsManager.MODE_ALLOWED){
+        if (mode != AppOpsManager.MODE_ALLOWED) {
             startActivityForResult(new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS), APPUSAGE_REQUEST_CODE);
         }
     }
@@ -149,7 +157,7 @@ public class MainActivity extends AppCompatActivity
     private void setupViewPager(ViewPager viewPager) {
         viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager());
         viewPagerAdapter.addFragment(schedule, "SCHEDULE");
-        viewPagerAdapter.addFragment(new Fragment_Tasks(schedule), "TASKS");
+        viewPagerAdapter.addFragment(new Fragment_Tasks(tf_classifytasks, schedule), "TASKS");
         viewPagerAdapter.addFragment(new Fragment_Insights(), "INSIGHTS");
         viewPager.setAdapter(viewPagerAdapter);
     }
@@ -158,7 +166,7 @@ public class MainActivity extends AppCompatActivity
     public boolean onNavigationItemSelected(MenuItem item) {
         int id = item.getItemId();
 
-        switch (id){
+        switch (id) {
             case R.id.logOut:
                 //sign out using firebase
                 AuthUI.getInstance().signOut(this);
@@ -255,7 +263,7 @@ public class MainActivity extends AppCompatActivity
                     Fragment_Schedule.isReadCalendarGranted = true;
                     schedule.refresh();
                     viewPagerAdapter.notifyDataSetChanged();
-                }  else {
+                } else {
                     // Explain to the user that the feature is unavailable because
                     // the features requires a permission that the user has denied.
                     // At the same time, respect the user's decision. Don't link to
@@ -271,7 +279,7 @@ public class MainActivity extends AppCompatActivity
                     // Permission is granted. Continue the action or workflow
                     // in your app.
                     Fragment_Schedule.isWriteCalendarGranted = true;
-                }  else {
+                } else {
                     // Explain to the user that the feature is unavailable because
                     // the features requires a permission that the user has denied.
                     // At the same time, respect the user's decision. Don't link to
@@ -288,7 +296,7 @@ public class MainActivity extends AppCompatActivity
     public void onReadCalendarPermissionDialogGrantClick(DialogFragment dialog) {
         // request READ_CALENDAR permission
         ActivityCompat.requestPermissions(this,
-                new String[] { Manifest.permission.READ_CALENDAR },
+                new String[]{Manifest.permission.READ_CALENDAR},
                 Fragment_Schedule.READ_CALENDAR_PERMISSION_REQUEST_CODE);
     }
 

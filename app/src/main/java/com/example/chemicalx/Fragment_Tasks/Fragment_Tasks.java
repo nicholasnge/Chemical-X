@@ -6,7 +6,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
@@ -14,9 +13,10 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.chemicalx.Category;
 import com.example.chemicalx.Fragment_Schedule.Fragment_Schedule;
 import com.example.chemicalx.R;
-import com.google.android.gms.tasks.OnSuccessListener;
+import com.example.chemicalx.TextClassificationClient;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentChange;
@@ -30,7 +30,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -38,7 +37,7 @@ import java.util.TimerTask;
 
 public class Fragment_Tasks extends Fragment {
     Fragment_Schedule fragment_schedule;
-    public final static String TAG = "Fragment_Todolist";
+    public final static String TAG = "FragmentTasks";
     FirebaseFirestore db;
     private ArrayList<TaskCategoryModel> mDataList = new ArrayList<>();
     PriorityQueue<TaskItemModel> taskItemQueue;
@@ -55,19 +54,24 @@ public class Fragment_Tasks extends Fragment {
     int previousProgressColorOfSelected;
     int previousBackgroundColorOfSelected;
 
+    //for tf model
+    public TextClassificationClient tf_classifytasks;
+
     //colors
     public static final int workProgressColor = R.color.MaterialBlue100;
     public static final int workBackgroundColor = R.color.MaterialBlue50;
-    public static final int recreationProgressColor = R.color.MaterialGreen100;
-    public static final int recreationBackgroundColor = R.color.MaterialGreen50;
-    public static final int hobbyProgressColor = R.color.MaterialRed100;
-    public static final int hobbyBackgroundColor = R.color.MaterialRed50;
+    public static final int hobbiesProgressColor = R.color.MaterialGreen100;
+    public static final int hobbiesBackgroundColor = R.color.MaterialGreen50;
+    public static final int schoolProgressColor = R.color.MaterialRed100;
+    public static final int schoolBackgroundColor = R.color.MaterialRed50;
+    public static final int choresProgressColor = R.color.MaterialYellow100;
+    public static final int choresBackgroundColor = R.color.MaterialYellow50;
     public static final int selectedProgressColor = R.color.colorSecondary;
     public static final int selectedBackgroundColor = R.color.colorSecondaryLight;
 
-    public Fragment_Tasks(Fragment_Schedule schedule) {
-        //create reference to schedule fragment for passing of data
-        fragment_schedule = schedule;
+    public Fragment_Tasks(TextClassificationClient tf_classifytasks, Fragment_Schedule schedule) {
+        this.tf_classifytasks = tf_classifytasks;
+        this.fragment_schedule = schedule;
     }
 
     @Override
@@ -88,7 +92,7 @@ public class Fragment_Tasks extends Fragment {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                DialogFragment addTodo = new AddTask();
+                DialogFragment addTodo = new AddTask(tf_classifytasks);
                 addTodo.show(getChildFragmentManager(), "tag");
             }
         });
@@ -98,8 +102,9 @@ public class Fragment_Tasks extends Fragment {
 
     private void getTasks() {
         final ArrayList<TaskItemModel> tasksWork = new ArrayList<>();
-        final ArrayList<TaskItemModel> tasksRecreation = new ArrayList<>();
-        final ArrayList<TaskItemModel> tasksHobby = new ArrayList<>();
+        final ArrayList<TaskItemModel> tasksHobbies = new ArrayList<>();
+        final ArrayList<TaskItemModel> tasksSchool = new ArrayList<>();
+        final ArrayList<TaskItemModel> tasksChores = new ArrayList<>();
         taskItemQueue = new PriorityQueue<>(new Comparator<TaskItemModel>() {
             @Override
             public int compare(TaskItemModel o1, TaskItemModel o2) {
@@ -116,8 +121,9 @@ public class Fragment_Tasks extends Fragment {
         //format the array into a taskcategorymodel
         mDataList.clear();
         mDataList.add(new TaskCategoryModel("Work", tasksWork, workBackgroundColor, workProgressColor));
-        mDataList.add(new TaskCategoryModel("Recreation", tasksRecreation, recreationBackgroundColor, recreationProgressColor));
-        mDataList.add(new TaskCategoryModel("Hobby", tasksHobby, hobbyBackgroundColor, hobbyProgressColor));
+        mDataList.add(new TaskCategoryModel("Hobbies", tasksHobbies, hobbiesBackgroundColor, hobbiesProgressColor));
+        mDataList.add(new TaskCategoryModel("School", tasksSchool, schoolBackgroundColor, schoolProgressColor));
+        mDataList.add(new TaskCategoryModel("Chores", tasksChores, choresBackgroundColor, choresProgressColor));
 
         //initialise the recycler view
         initRecyclerView();
@@ -152,20 +158,29 @@ public class Fragment_Tasks extends Fragment {
                                         case "Work":
                                             tasksWork.add(task);
                                             break;
-                                        case "Recreation":
-                                            tasksRecreation.add(task);
+                                        case "Hobbies":
+                                            tasksHobbies.add(task);
                                             break;
-                                        case "Hobby":
-                                            tasksHobby.add(task);
+                                        case "School":
+                                            tasksSchool.add(task);
+                                            break;
+                                        case "Chores":
+                                            tasksChores.add(task);
                                             break;
                                         default:
-                                            Log.e(TAG, "snapshot: no such category");
+                                            Log.e(TAG, "snapshot: no such category: " + snapshot.getString("category") + ", defaulting to Work");
+                                            tasksWork.add(task);
                                     }
+
                                     //add task to priorityqueue
                                     taskItemQueue.add(task);
 
                                     // find the taskItemAdapter responsible for updating its recyclerview
                                     TaskItemAdapter adapter = mAdapter.taskItemAdapters.get(snapshot.getString("category"));
+                                    //if no such category, default to Work
+                                    if (adapter == null){
+                                        adapter = mAdapter.taskItemAdapters.get("Work");
+                                    }
                                     adapter.notifyItemInserted(adapter.taskList.size());
                                     mAdapter.notifyChange(snapshot.getString("category"));
                                 }

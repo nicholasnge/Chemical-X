@@ -16,11 +16,19 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    aaptOptions {
+        noCompress "tflite"
+    }
+    
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 
 }
@@ -59,6 +67,9 @@ dependencies {
 
     //FireBase Cloud Storage
     implementation 'com.google.firebase:firebase-storage:19.1.1'
+
+    //TensorFlow
+    implementation 'org.tensorflow:tensorflow-lite:2.2.0'
 
     // for preferences package for settings
     def preference_version = "1.1.1"
