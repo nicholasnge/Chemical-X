@@ -30,6 +30,7 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.Timestamp;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -44,7 +45,6 @@ import java.util.Map;
 
 public class AddTask extends DialogFragment {
     View view;
-    FirebaseFirestore db;
     EditText taskTitle;
     Croller croller;
     TextView taskDuration;
@@ -122,7 +122,6 @@ public class AddTask extends DialogFragment {
 
     private void setupSubmitButton() {
         // set up submit button
-        db = FirebaseFirestore.getInstance();
         createTaskButton = view.findViewById(R.id.createTaskButton);
         createTaskButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -147,9 +146,8 @@ public class AddTask extends DialogFragment {
                     task.put("category", categorySpinner.getSelectedItem().toString());
                 }
 
-                db.collection("users")
-                        // TODO: 6/25/2020 change to ID of current user
-                        .document("testuser")
+                FirebaseFirestore.getInstance().collection("users")
+                        .document(FirebaseAuth.getInstance().getCurrentUser().getUid())
                         .collection("tasks")
                         .add(task)
                         .addOnFailureListener(new OnFailureListener() {

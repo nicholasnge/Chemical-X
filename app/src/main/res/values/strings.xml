@@ -28,11 +28,17 @@
     <string name="usage_pie_chart_title">"App Usage Summary"</string>
 
     <string-array name="todo_categories">
-        <item>What do you think?</item>
-        <item>Work</item>
-        <item>Hobbies</item>
-        <item>School</item>
-        <item>Chores</item>
+    <item>What do you think?</item>
+    <item>Work</item>
+    <item>Hobbies</item>
+    <item>School</item>
+    <item>Chores</item>
+</string-array>
+
+    <string-array name="feedback_dialog">
+        <item>YES :D</item>
+        <item>average</item>
+        <item>unproductive :(</item>
     </string-array>
 
     <string name="delete_account_setting_dialog_title">"Delete Account?"</string>
@@ -71,4 +77,6 @@
 
     <string name="add_event_update_datetime_dialog_title">"Update Date and/or Time"</string>
     <string name="add_event_update_datetime_dialog_positive_button_text">"Update"</string>
+    <string name="settings">Settings</string>
+    <string name="feedback_dialog_question">How was your session?</string>
 </resources>

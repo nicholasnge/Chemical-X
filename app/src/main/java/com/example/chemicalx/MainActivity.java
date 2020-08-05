@@ -6,13 +6,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.os.Handler;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.MenuItem;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -30,7 +31,9 @@ import java.util.List;
 import com.example.chemicalx.Fragment_Schedule.Fragment_Schedule;
 import com.example.chemicalx.Fragment_Schedule.ReadCalendarPermissionDialogFragment;
 import com.example.chemicalx.Fragment_Insights.Fragment_Insights;
+import com.example.chemicalx.Fragment_Tasks.FeedbackDialog;
 import com.example.chemicalx.Fragment_Tasks.Fragment_Tasks;
+import com.example.chemicalx.Fragment_Tasks.TaskItemModel;
 import com.example.chemicalx.settings.SettingsActivity;
 import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -44,10 +47,16 @@ import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.GetTokenResult;
+import com.google.firebase.firestore.DocumentChange;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.QuerySnapshot;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, FirebaseAuth.AuthStateListener,
-        ReadCalendarPermissionDialogFragment.ReadCalendarPermissionDialogListener {
+        ReadCalendarPermissionDialogFragment.ReadCalendarPermissionDialogListener, FeedbackDialog.FeedbackDialogListener {
     public static final String TAG = "MainActivity";
     public static final int APPUSAGE_REQUEST_CODE = 1;
     private Toolbar toolbar;
@@ -56,18 +65,26 @@ public class MainActivity extends AppCompatActivity
     private ViewPagerAdapter viewPagerAdapter;
     private GoogleSignInClient googleSignInClient;
 
+    //tasks fragment
+    Fragment_Tasks task_fragment;
+    FirebaseFirestore db;
+    public ArrayList<TaskItemModel> tasks = new ArrayList<>();
+
     NavigationView navView;
     DrawerLayout drawerLayout;
     ActionBarDrawerToggle toggle;
 
-    private Fragment_Schedule schedule;
+    private Fragment_Schedule schedule_fragment;
 
-    //for tf model
+    //for tf modelf
     public TextClassificationClient tf_classifytasks;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // Initialise this activity as firebaseAuthListener to check for user account changes
+        FirebaseAuth.getInstance().addAuthStateListener(this);
+
         // set view to activity main
         setContentView(R.layout.activity_main);
 
@@ -79,12 +96,9 @@ public class MainActivity extends AppCompatActivity
         toolbar = (Toolbar) findViewById(R.id.addTaskToolbar);
         setSupportActionBar(toolbar);
 
-        //set up tabs (fragments)
-        schedule = new Fragment_Schedule(tf_classifytasks);
+        //setup tabs
         viewPager = (ViewPager) findViewById(R.id.viewpager);
         setupViewPager(viewPager);
-        tabLayout = (TabLayout) findViewById(R.id.tabs);
-        tabLayout.setupWithViewPager(viewPager);
 
         //set up navigation drawer
         drawerLayout = findViewById(R.id.drawer);
@@ -121,9 +135,6 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onStart() {
         super.onStart();
-
-        // SETTING UP GOOGLE ACCOUNT
-        // TODO: 6/25/2020 check if this code needs to be removed with the new firebase login
         GoogleSignInOptions gso = new GoogleSignInOptions
                 .Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestEmail()
@@ -143,21 +154,27 @@ public class MainActivity extends AppCompatActivity
             userDisplay.setText(personName);
             userContactDisplay.setText(personEmail);
         }
-
-        // Initialise this activity as firebaseAuthListener to check for user account changes
-        FirebaseAuth.getInstance().addAuthStateListener(this);
     }
 
     @Override
-    protected void onStop() {
-        super.onStop();
+    protected void onDestroy() {
+        super.onDestroy();
         FirebaseAuth.getInstance().removeAuthStateListener(this);
     }
 
     private void setupViewPager(ViewPager viewPager) {
+        //set up tabs (fragments)
+        tabLayout = (TabLayout) findViewById(R.id.tabs);
+        tabLayout.setupWithViewPager(viewPager);
+
         viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager());
-        viewPagerAdapter.addFragment(schedule, "SCHEDULE");
-        viewPagerAdapter.addFragment(new Fragment_Tasks(tf_classifytasks, schedule), "TASKS");
+        schedule_fragment = new Fragment_Schedule(tf_classifytasks);
+        viewPagerAdapter.addFragment(schedule_fragment, "SCHEDULE");
+
+        //taskfragment
+        task_fragment = new Fragment_Tasks(tf_classifytasks, tasks);
+        viewPagerAdapter.addFragment(task_fragment, "TASKS");
+
         viewPagerAdapter.addFragment(new Fragment_Insights(), "INSIGHTS");
         viewPager.setAdapter(viewPagerAdapter);
     }
@@ -203,6 +220,9 @@ public class MainActivity extends AppCompatActivity
                         @Override
                         public void onSuccess(GetTokenResult getTokenResult) {
                             Log.d(TAG, "onSuccess: " + getTokenResult.getToken());
+
+                            // after authenticating user, get tasks from firebase
+                            getTasks();
                         }
                     });
         }
@@ -261,7 +281,7 @@ public class MainActivity extends AppCompatActivity
                     // Permission is granted. Continue the action or workflow
                     // in your app.
                     Fragment_Schedule.isReadCalendarGranted = true;
-                    schedule.refresh();
+                    schedule_fragment.refresh();
                     viewPagerAdapter.notifyDataSetChanged();
                 } else {
                     // Explain to the user that the feature is unavailable because
@@ -303,4 +323,52 @@ public class MainActivity extends AppCompatActivity
     public void onReadCalendarPermissionDialogDenyClick(DialogFragment dialog) {
         dialog.getDialog().cancel();
     }
+
+    @Override
+    public void onFeedbackClick(DialogFragment dialog, int which) {
+//        MainActivity main = (MainActivity)getActivity();
+        Toast.makeText(this, "feedback received", Toast.LENGTH_SHORT).show();
+    }
+
+
+    private void getTasks() {
+        db = FirebaseFirestore.getInstance();
+        db.collection("users")
+                .document(FirebaseAuth.getInstance().getCurrentUser().getUid())
+                .collection("tasks")
+                .addSnapshotListener(new EventListener<QuerySnapshot>() {
+                    @Override
+                    public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
+                        if (e != null) {
+                            Log.e(TAG, "FirebaseFirestoreException");
+                            return;
+                        }
+                        if (queryDocumentSnapshots != null) {
+                            for (DocumentChange docChange : queryDocumentSnapshots.getDocumentChanges()) {
+                                if (docChange.getType() == DocumentChange.Type.ADDED) {
+                                    DocumentSnapshot snapshot = docChange.getDocument();
+
+                                    TaskItemModel task = new TaskItemModel(
+                                            snapshot.getId(),
+                                            snapshot.getString("title"),
+                                            snapshot.getString("category"),
+                                            snapshot.getLong("totalTime").intValue(),
+                                            snapshot.getLong("timePassed").intValue(),
+                                            snapshot.getTimestamp("dueDate"));
+
+                                    //add task to list of tasks
+                                    tasks.add(task);
+                                    task_fragment.addTask(task);
+                                }
+                            }
+                            // after retrieving tasks, add them schedule if havent done so.
+                            // there are two callers of addTasks(). MainActivity after retrieving tasks (here) or FragmentSchedule after being created
+                            // todo replace with AI stuff
+                            schedule_fragment.addTasks();
+                        }
+                    }
+
+                });
+    }
 }
+

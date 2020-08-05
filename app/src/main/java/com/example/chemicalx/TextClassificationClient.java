@@ -83,7 +83,6 @@ public class TextClassificationClient {
         try {
             ByteBuffer buffer = loadModelFile(this.context.getAssets());
             tflite = new Interpreter(buffer);
-            Log.v(TAG, "TFLite model loaded.");
         } catch (IOException ex) {
             Log.e(TAG, ex.getMessage());
         }
@@ -94,7 +93,6 @@ public class TextClassificationClient {
     private synchronized void loadDictionary() {
         try {
             loadDictionaryFile(this.context.getAssets());
-            Log.v(TAG, "Dictionary loaded.");
         } catch (IOException ex) {
             Log.e(TAG, ex.getMessage());
         }
@@ -105,7 +103,6 @@ public class TextClassificationClient {
     private synchronized void loadLabels() {
         try {
             loadLabelFile(this.context.getAssets());
-            Log.v(TAG, "Labels loaded.");
         } catch (IOException ex) {
             Log.e(TAG, ex.getMessage());
         }
@@ -126,8 +123,7 @@ public class TextClassificationClient {
         // Pre-prosessing.
         float[][] input = tokenizeInputText(text);
 
-        // Run inference.
-        Log.v(TAG, "Classifying text with TF Lite...");
+        // Run inference
         float[][] output = new float[1][labels.size()];
         tflite.run(input, output);
 

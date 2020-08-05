@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
@@ -15,10 +16,12 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.chemicalx.Category;
 import com.example.chemicalx.Fragment_Schedule.Fragment_Schedule;
+import com.example.chemicalx.MainActivity;
 import com.example.chemicalx.R;
 import com.example.chemicalx.TextClassificationClient;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.Timestamp;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
@@ -30,6 +33,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -38,7 +42,7 @@ import java.util.TimerTask;
 public class Fragment_Tasks extends Fragment {
     Fragment_Schedule fragment_schedule;
     public final static String TAG = "FragmentTasks";
-    FirebaseFirestore db;
+    ArrayList<TaskItemModel> raw_tasks;
     private ArrayList<TaskCategoryModel> mDataList = new ArrayList<>();
     PriorityQueue<TaskItemModel> taskItemQueue;
     private TaskCategoryAdapter mAdapter;
@@ -69,9 +73,9 @@ public class Fragment_Tasks extends Fragment {
     public static final int selectedProgressColor = R.color.colorSecondary;
     public static final int selectedBackgroundColor = R.color.colorSecondaryLight;
 
-    public Fragment_Tasks(TextClassificationClient tf_classifytasks, Fragment_Schedule schedule) {
+    public Fragment_Tasks(TextClassificationClient tf_classifytasks, ArrayList<TaskItemModel> tasks) {
         this.tf_classifytasks = tf_classifytasks;
-        this.fragment_schedule = schedule;
+        this.raw_tasks = tasks;
     }
 
     @Override
@@ -85,7 +89,6 @@ public class Fragment_Tasks extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_todolist, container, false);
         recyclerView = view.findViewById(R.id.todolist_tasks_recycler);
-        getTasks();
 
         //set floating action button to open addTodo
         fab = getActivity().findViewById(R.id.floatingActionButton);
@@ -97,101 +100,49 @@ public class Fragment_Tasks extends Fragment {
             }
         });
 
+        // initialise recycler view holding tasks
+        initRecyclerView();
+
         return view;
     }
 
-    private void getTasks() {
-        final ArrayList<TaskItemModel> tasksWork = new ArrayList<>();
-        final ArrayList<TaskItemModel> tasksHobbies = new ArrayList<>();
-        final ArrayList<TaskItemModel> tasksSchool = new ArrayList<>();
-        final ArrayList<TaskItemModel> tasksChores = new ArrayList<>();
-        taskItemQueue = new PriorityQueue<>(new Comparator<TaskItemModel>() {
-            @Override
-            public int compare(TaskItemModel o1, TaskItemModel o2) {
-                if (o1.dueDate == null){
-                    return -1; // o2 is more urgent
-                }
-                if (o2.dueDate == null){
-                    return 1; // o1 is more urgent
-                }
-                return -o1.dueDate.compareTo(o2.dueDate);
+    public void addTask(TaskItemModel task) {
+            switch (task.category) {
+                case "Work":
+                    mDataList.get(0).add(task);
+                    break;
+                case "Hobbies":
+                    mDataList.get(1).add(task);
+                    break;
+                case "School":
+                    mDataList.get(2).add(task);
+                    break;
+                case "Chores":
+                    mDataList.get(3).add(task);
+                    break;
+                default:
+                    Log.e(TAG, "snapshot: no such category: " + task.category + ", defaulting to Work");
+                    mDataList.get(0).add(task);
             }
-        });
 
-        //format the array into a taskcategorymodel
-        mDataList.clear();
-        mDataList.add(new TaskCategoryModel("Work", tasksWork, workBackgroundColor, workProgressColor));
-        mDataList.add(new TaskCategoryModel("Hobbies", tasksHobbies, hobbiesBackgroundColor, hobbiesProgressColor));
-        mDataList.add(new TaskCategoryModel("School", tasksSchool, schoolBackgroundColor, schoolProgressColor));
-        mDataList.add(new TaskCategoryModel("Chores", tasksChores, choresBackgroundColor, choresProgressColor));
-
-        //initialise the recycler view
-        initRecyclerView();
-
-        db = FirebaseFirestore.getInstance();
-        db.collection("users")
-                .document("testuser")
-                .collection("tasks")
-                .addSnapshotListener(new EventListener<QuerySnapshot>() {
-                    @Override
-                    public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
-                        if (e != null) {
-                            Log.e(TAG, "FirebaseFirestoreException");
-                            return;
-                        }
-                        if (queryDocumentSnapshots != null) {
-                            boolean added = false;
-                            for (DocumentChange docChange : queryDocumentSnapshots.getDocumentChanges()) {
-                                if (docChange.getType() == DocumentChange.Type.ADDED) {
-                                    added = true;
-                                    DocumentSnapshot snapshot = docChange.getDocument();
-
-                                    TaskItemModel task = new TaskItemModel(
-                                            snapshot.getId(),
-                                            snapshot.getString("title"),
-                                            snapshot.getString("category"),
-                                            snapshot.getLong("totalTime").intValue(),
-                                            snapshot.getLong("timePassed").intValue(),
-                                            snapshot.getTimestamp("dueDate"));
-
-                                    switch (snapshot.getString("category")) {
-                                        case "Work":
-                                            tasksWork.add(task);
-                                            break;
-                                        case "Hobbies":
-                                            tasksHobbies.add(task);
-                                            break;
-                                        case "School":
-                                            tasksSchool.add(task);
-                                            break;
-                                        case "Chores":
-                                            tasksChores.add(task);
-                                            break;
-                                        default:
-                                            Log.e(TAG, "snapshot: no such category: " + snapshot.getString("category") + ", defaulting to Work");
-                                            tasksWork.add(task);
-                                    }
-
-                                    //add task to priorityqueue
-                                    taskItemQueue.add(task);
-
-                                    // find the taskItemAdapter responsible for updating its recyclerview
-                                    TaskItemAdapter adapter = mAdapter.taskItemAdapters.get(snapshot.getString("category"));
-                                    //if no such category, default to Work
-                                    if (adapter == null){
-                                        adapter = mAdapter.taskItemAdapters.get("Work");
-                                    }
-                                    adapter.notifyItemInserted(adapter.taskList.size());
-                                    mAdapter.notifyChange(snapshot.getString("category"));
-                                }
-                            }
-                            fragment_schedule.addTasks(taskItemQueue);
-                        }
-                    }
-                });
-    }
+            // find the taskItemAdapter responsible for updating its recyclerview
+            TaskItemAdapter adapter = mAdapter.taskItemAdapters.get(task.category);
+            //if no such category, default to Work
+            if (adapter == null) {
+                adapter = mAdapter.taskItemAdapters.get("Work");
+            }
+            adapter.notifyItemInserted(adapter.taskList.size());
+            mAdapter.notifyChange(task.category);
+        }
 
     private void initRecyclerView() {
+        //format the array into a taskcategorymodel
+        mDataList.clear();
+        mDataList.add(new TaskCategoryModel("Work", new ArrayList<>(), workBackgroundColor, workProgressColor));
+        mDataList.add(new TaskCategoryModel("Hobbies", new ArrayList<>(), hobbiesBackgroundColor, hobbiesProgressColor));
+        mDataList.add(new TaskCategoryModel("School", new ArrayList<>(), schoolBackgroundColor, schoolProgressColor));
+        mDataList.add(new TaskCategoryModel("Chores", new ArrayList<>(), choresBackgroundColor, choresProgressColor));
+
         mLayoutManager = new LinearLayoutManager(getActivity()) {
             @Override
             public boolean canScrollVertically() {
@@ -246,8 +197,8 @@ public class Fragment_Tasks extends Fragment {
 
     public void updateFirebase() {
         //update task document
-        db.collection("users")
-                .document("testuser")
+        FirebaseFirestore.getInstance().collection("users")
+                .document(FirebaseAuth.getInstance().getCurrentUser().getUid())
                 .collection("tasks")
                 .document(selectedTask.docID)
                 .update("timePassed", selectedTask.timePassed);
@@ -260,8 +211,8 @@ public class Fragment_Tasks extends Fragment {
         newhistory.put("timeEnd", new Timestamp(new Date()));
         newhistory.put("completion", false);
 
-        db.collection("users")
-                .document("testuser")
+        FirebaseFirestore.getInstance().collection("users")
+                .document(FirebaseAuth.getInstance().getUid())
                 .collection("history")
                 .add(newhistory);
     }
@@ -271,6 +222,12 @@ public class Fragment_Tasks extends Fragment {
         selectedTask = null;
         timer.cancel();
 
+        // Initialise Feedback Dialog
+        DialogFragment feedbackDialog = new FeedbackDialog();
+        // You can get the FragmentManager by calling getSupportFragmentManager()
+        // from the FragmentActivity or getFragmentManager() from a Fragment.
+        feedbackDialog.show(getChildFragmentManager(), "feedback");
+
         //make it look normal again
         selectedTaskViewholder.cardView.setCardElevation(1);
         selectedTaskViewholder.progressBar.setProgressTintList(ColorStateList.valueOf(getContext().getResources().getColor(previousProgressColorOfSelected)));
@@ -278,8 +235,8 @@ public class Fragment_Tasks extends Fragment {
     }
 
     public void completeTask(TaskItemAdapter.TodoViewHolder holder, TaskItemModel task) {
-        db.collection("users")
-                .document("testuser")
+        FirebaseFirestore.getInstance().collection("users")
+                .document(FirebaseAuth.getInstance().getCurrentUser().getUid())
                 .collection("tasks")
                 .document(task.docID)
                 .delete();
@@ -293,8 +250,8 @@ public class Fragment_Tasks extends Fragment {
         newhistory.put("totalTime", task.totalTime);
         newhistory.put("completion", true);
 
-        db.collection("users")
-                .document("testuser")
+        FirebaseFirestore.getInstance().collection("users")
+                .document(FirebaseAuth.getInstance().getCurrentUser().getUid())
                 .collection("history")
                 .add(newhistory);
 

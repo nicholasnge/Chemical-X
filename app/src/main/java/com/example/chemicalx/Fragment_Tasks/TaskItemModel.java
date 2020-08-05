@@ -10,7 +10,7 @@ public class TaskItemModel {
     int totalTime;// in seconds
     int timePassed;// in seconds
     int progressBar;
-    Timestamp dueDate;
+    public Timestamp dueDate;
 
 
     public TaskItemModel(String docID, String title, String category, int totalTime, int timePassed, Timestamp dueDate) {

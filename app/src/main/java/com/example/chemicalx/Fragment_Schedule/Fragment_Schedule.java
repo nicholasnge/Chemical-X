@@ -28,7 +28,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.chemicalx.Fragment_Tasks.TaskItemModel;
+import com.example.chemicalx.MainActivity;
 import com.example.chemicalx.R;
+import com.example.chemicalx.TextClassificationClient;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
@@ -93,6 +95,13 @@ public class Fragment_Schedule extends Fragment {
     private static final int PROJECTION_TITLE_INDEX = 0;
     private static final int PROJECTION_BEGIN_INDEX = 1;
     private static final int PROJECTION_END_INDEX = 2;
+
+    // delay constant for how long until buttons disappear
+    private static final long BUTTONS_VISIBLE_DURATION = 3000;
+
+    // request codes for startActivityForResult
+    private static final int ADD_EVENT_USING_CALENDAR = 0;
+    private static final int DELETE_EVENTS_USING_CALENDAR = 1;
 
     public Fragment_Schedule(TextClassificationClient tf_classifytasks) {
         this.tf_classifytasks = tf_classifytasks;
@@ -224,6 +233,7 @@ public class Fragment_Schedule extends Fragment {
         initDateAndDayTextView();
         setDataListItems();
         initTimelineRecyclerView();
+        addTasks();
         initAddEventButton();
         initDeleteEventsButton();
     }
@@ -382,7 +392,13 @@ public class Fragment_Schedule extends Fragment {
         }
     }
 
-    public void addTasks(PriorityQueue<TaskItemModel> taskItemQueue) {
+    public void addTasks() {
+        List<TaskItemModel> tasks = ((MainActivity)getActivity()).tasks;
+//        if (tasks.size() > 0){
+//            //TODO replace with AI
+//            tasks_added = true;
+//        }
+
         long one_hour = 60 * 60 *1000;
         TimeLineModel timeLineModel;
         List<TimeLineModel> toBeAdded = new ArrayList<>();
@@ -396,13 +412,13 @@ public class Fragment_Schedule extends Fragment {
             // if we havent passed the event and theres a short gap between 2 events, add a task
             // this is a temporary condition, replaced by our AI stuff when we finish it.
             boolean eventNotOver = now.getTimeInMillis() < currentItem.dtend;
-            boolean taskQueueSizeSufficient = taskItemQueue.size() > 0;
+            boolean taskQueueSizeSufficient = tasks.size() > 0;
             Log.d(nextItem.dtstart -currentItem.dtend + "", currentItem.dtend+ "");
             boolean atLeast1Hour = nextItem.dtstart - currentItem.dtend >= one_hour;
-            boolean atMost3Hours = nextItem.dtstart - currentItem.dtend <= one_hour*3;
-            Log.d(currentItem.message, eventNotOver + " " + taskQueueSizeSufficient + " " + atLeast1Hour + " " + atMost3Hours);
-            if (eventNotOver && taskQueueSizeSufficient && atLeast1Hour && atMost3Hours){
-                TaskItemModel t = taskItemQueue.remove();
+            boolean atMost8Hours = nextItem.dtstart - currentItem.dtend <= one_hour*8;
+            Log.d(currentItem.message, eventNotOver + " " + taskQueueSizeSufficient + " " + atLeast1Hour + " " + atMost8Hours);
+            if (eventNotOver && taskQueueSizeSufficient && atLeast1Hour && atMost8Hours){
+                TaskItemModel t = tasks.get(0);
                 timeLineModel = new TimeLineModel(t.getTitle(), mDataList.get(i).dtend, mDataList.get(i+1).dtstart, OrderStatus.INACTIVE, t.getCategory(), true);
                 toBeAdded.add(timeLineModel);
             }
