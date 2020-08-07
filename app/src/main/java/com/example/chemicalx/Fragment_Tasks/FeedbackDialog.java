@@ -1,25 +1,29 @@
 package com.example.chemicalx.Fragment_Tasks;
 
-import android.app.ActionBar;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.view.ViewGroup;
-import android.widget.RatingBar;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
 
 import com.example.chemicalx.R;
 
-public class FeedbackDialog extends DialogFragment {
-    public interface FeedbackDialogListener {
-        public void onFeedbackClick(DialogFragment dialog, int which);
-    }
+import java.util.HashMap;
 
+public class FeedbackDialog extends DialogFragment {
     //this is going to be main activity
     FeedbackDialogListener listener;
+    HashMap<String, Object> currentTask;
+
+    public FeedbackDialog(HashMap<String, Object> currentTask) {
+        this.currentTask = currentTask;
+    }
+
+    public interface FeedbackDialogListener {
+        public void onFeedbackClick(DialogFragment dialog, int which, HashMap<String, Object> currentTask);
+    }
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -30,7 +34,7 @@ public class FeedbackDialog extends DialogFragment {
                     public void onClick(DialogInterface dialog, int which) {
                         // The 'which' argument contains the index position
                         // of the selected item
-                        listener.onFeedbackClick(FeedbackDialog.this, which);
+                        listener.onFeedbackClick(FeedbackDialog.this, which, currentTask);
                     }
                 });
         return builder.create();

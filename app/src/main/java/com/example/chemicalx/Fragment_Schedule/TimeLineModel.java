@@ -7,10 +7,10 @@ import java.util.Date;
 
 public class TimeLineModel implements Comparable<TimeLineModel>{
     String message;
-    long dtstart;
-    long dtend;
+    public long dtstart;
+    public long dtend;
     OrderStatus status;
-    String category;
+    public String category;
     boolean isFromTasks = false;
 
     public TimeLineModel(String message, long dtstart, long dtend, OrderStatus status, String category) {

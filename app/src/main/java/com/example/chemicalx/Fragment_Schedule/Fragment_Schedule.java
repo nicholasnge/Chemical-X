@@ -34,6 +34,7 @@ import com.example.chemicalx.TextClassificationClient;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+import java.sql.Time;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -215,6 +216,10 @@ public class Fragment_Schedule extends Fragment {
 
         // move earlier events nearer to the start of the list
         mDataList.sort(null);
+
+        // pass the schedule list to Main in a terribly bad practices way
+        MainActivity main = (MainActivity)getActivity();
+        main.scheduleList = (ArrayList<TimeLineModel>)mDataList.clone();
     }
 
     private void assignViews(View view) {

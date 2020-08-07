@@ -162,13 +162,11 @@ public class Fragment_Tasks extends Fragment {
     public void selectTask(final TaskItemAdapter.TodoViewHolder holder, final TaskItemModel todoItemModel, int progressColor, int backgroundColor) {
         // if item was already selected, deselect
         if (todoItemModel == selectedTask) {
-            updateFirebase(); //update current task
             deselectCurrentTask();
         }
         // else handle select
         else {
             if (selectedTask != null) {
-                updateFirebase(); //update current task
                 deselectCurrentTask(); // deselect current task
             }
             selectedTask = todoItemModel;
@@ -196,42 +194,46 @@ public class Fragment_Tasks extends Fragment {
     }
 
     public void updateFirebase() {
-        //update task document
         FirebaseFirestore.getInstance().collection("users")
                 .document(FirebaseAuth.getInstance().getCurrentUser().getUid())
                 .collection("tasks")
                 .document(selectedTask.docID)
                 .update("timePassed", selectedTask.timePassed);
-
-        //update user history
-        HashMap<String, Object> newhistory = new HashMap<>();
-        newhistory.put("docID", selectedTask.docID);
-        newhistory.put("category", selectedTask.category);
-        newhistory.put("timeStart", new Timestamp(startTimestamp));
-        newhistory.put("timeEnd", new Timestamp(new Date()));
-        newhistory.put("completion", false);
-
-        FirebaseFirestore.getInstance().collection("users")
-                .document(FirebaseAuth.getInstance().getUid())
-                .collection("history")
-                .add(newhistory);
     }
 
     public void deselectCurrentTask() {
-        //deselect
-        selectedTask = null;
+        //stop increasing timing
         timer.cancel();
 
+        //get current task details to give to dialog
+        HashMap<String, Object> currentTask = getCurrentTaskDetails();
+
         // Initialise Feedback Dialog
-        DialogFragment feedbackDialog = new FeedbackDialog();
+        DialogFragment feedbackDialog = new FeedbackDialog(currentTask);
         // You can get the FragmentManager by calling getSupportFragmentManager()
         // from the FragmentActivity or getFragmentManager() from a Fragment.
         feedbackDialog.show(getChildFragmentManager(), "feedback");
 
-        //make it look normal again
+        //update firebase
+        updateFirebase();
+
+        //deselect task
+        selectedTask = null;
+
+        //make deselected task look normal again
         selectedTaskViewholder.cardView.setCardElevation(1);
         selectedTaskViewholder.progressBar.setProgressTintList(ColorStateList.valueOf(getContext().getResources().getColor(previousProgressColorOfSelected)));
         selectedTaskViewholder.progressBar.setProgressBackgroundTintList(ColorStateList.valueOf(getContext().getResources().getColor(previousBackgroundColorOfSelected)));
+    }
+
+    public HashMap<String, Object> getCurrentTaskDetails(){
+        HashMap<String, Object> currentTask = new HashMap<>();
+        currentTask.put("docID", selectedTask.docID);
+        currentTask.put("category", selectedTask.category);
+        currentTask.put("timeStart", new Timestamp(startTimestamp));
+        currentTask.put("timeEnd", new Timestamp(new Date()));
+        currentTask.put("dueDate", selectedTask.dueDate);
+        return currentTask;
     }
 
     public void completeTask(TaskItemAdapter.TodoViewHolder holder, TaskItemModel task) {

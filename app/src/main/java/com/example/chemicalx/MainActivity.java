@@ -25,12 +25,16 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 import com.example.chemicalx.Fragment_Schedule.Fragment_Schedule;
 import com.example.chemicalx.Fragment_Schedule.ReadCalendarPermissionDialogFragment;
 import com.example.chemicalx.Fragment_Insights.Fragment_Insights;
+import com.example.chemicalx.Fragment_Schedule.TimeLineModel;
 import com.example.chemicalx.Fragment_Tasks.FeedbackDialog;
 import com.example.chemicalx.Fragment_Tasks.Fragment_Tasks;
 import com.example.chemicalx.Fragment_Tasks.TaskItemModel;
@@ -45,6 +49,7 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.tabs.TabLayout;
+import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.GetTokenResult;
 import com.google.firebase.firestore.DocumentChange;
@@ -69,6 +74,9 @@ public class MainActivity extends AppCompatActivity
     Fragment_Tasks task_fragment;
     FirebaseFirestore db;
     public ArrayList<TaskItemModel> tasks = new ArrayList<>();
+
+    //schedule fragment
+    public ArrayList<TimeLineModel> scheduleList;
 
     NavigationView navView;
     DrawerLayout drawerLayout;
@@ -325,9 +333,27 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onFeedbackClick(DialogFragment dialog, int which) {
-//        MainActivity main = (MainActivity)getActivity();
-        Toast.makeText(this, "feedback received", Toast.LENGTH_SHORT).show();
+    public void onFeedbackClick(DialogFragment dialog, int which, HashMap<String, Object> currentTask) {
+        if (scheduleList == null){
+            Toast.makeText(this, "error: feedback not saved", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        ArrayList<HashMap<String,Object>> schedule = new ArrayList<>();
+        for (TimeLineModel tlm : scheduleList){
+            HashMap<String,Object> tlm_ = new HashMap<>();
+            tlm_.put("category", tlm.category);
+            tlm_.put("timeStart", new Timestamp(new Date(tlm.dtstart)));
+            tlm_.put("timeEnd", new Timestamp(new Date(tlm.dtend)));
+            schedule.add(tlm_);
+        }
+        currentTask.put("schedule", schedule);
+        // 0,1,2 corresponding to productive, average, and unproductive
+        currentTask.put("productivity", which);
+
+        FirebaseFirestore.getInstance().collection("users")
+                .document(FirebaseAuth.getInstance().getUid())
+                .collection("history")
+                .add(currentTask);
     }
 
 
