@@ -1,6 +1,12 @@
 package com.example.chemicalx.Fragment_Tasks;
 
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Intent;
 import android.content.res.ColorStateList;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -9,6 +15,8 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -81,6 +89,7 @@ public class Fragment_Tasks extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        createNotificationChannel();
     }
 
     @Override
@@ -97,6 +106,7 @@ public class Fragment_Tasks extends Fragment {
             public void onClick(View v) {
                 DialogFragment addTodo = new AddTask(tf_classifytasks);
                 addTodo.show(getChildFragmentManager(), "tag");
+                triggerNotification();
             }
         });
 
@@ -106,34 +116,70 @@ public class Fragment_Tasks extends Fragment {
         return view;
     }
 
-    public void addTask(TaskItemModel task) {
-            switch (task.category) {
-                case "Work":
-                    mDataList.get(0).add(task);
-                    break;
-                case "Hobbies":
-                    mDataList.get(1).add(task);
-                    break;
-                case "School":
-                    mDataList.get(2).add(task);
-                    break;
-                case "Chores":
-                    mDataList.get(3).add(task);
-                    break;
-                default:
-                    Log.e(TAG, "snapshot: no such category: " + task.category + ", defaulting to Work");
-                    mDataList.get(0).add(task);
-            }
+    private void triggerNotification(){
+        Intent intent = new Intent(getActivity(), MainActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(getActivity(), 0, intent, 0);
 
-            // find the taskItemAdapter responsible for updating its recyclerview
-            TaskItemAdapter adapter = mAdapter.taskItemAdapters.get(task.category);
-            //if no such category, default to Work
-            if (adapter == null) {
-                adapter = mAdapter.taskItemAdapters.get("Work");
-            }
-            adapter.notifyItemInserted(adapter.taskList.size());
-            mAdapter.notifyChange(task.category);
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(getActivity(), "CHANNEL_ID")
+                .setSmallIcon(R.drawable.ic_molecular)
+                .setContentTitle("ChemicAL X")
+                .setContentText("you have a task that needs to be completed!")
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                .setContentIntent(pendingIntent)
+                .setAutoCancel(true);
+
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(getActivity());
+        // notificationId is a unique int for each notification that you must define
+        notificationManager.notify(1, builder.build());
+    }
+
+    private void createNotificationChannel() {
+        // Create the NotificationChannel, but only on API 26+ because
+        // the NotificationChannel class is new and not in the support library
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = "chemical channel";
+            String description = "chemical channel desc";
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            NotificationChannel channel = new NotificationChannel("CHANNEL_ID", name, importance);
+            channel.setDescription(description);
+            channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
+            // Register the channel with the system; you can't change the importance
+            // or other notification behaviors after this
+            NotificationManager notificationManager = getActivity().getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
         }
+    }
+
+
+    public void addTask(TaskItemModel task) {
+        switch (task.category) {
+            case "Work":
+                mDataList.get(0).add(task);
+                break;
+            case "Hobbies":
+                mDataList.get(1).add(task);
+                break;
+            case "School":
+                mDataList.get(2).add(task);
+                break;
+            case "Chores":
+                mDataList.get(3).add(task);
+                break;
+            default:
+                Log.e(TAG, "snapshot: no such category: " + task.category + ", defaulting to Work");
+                mDataList.get(0).add(task);
+        }
+
+        // find the taskItemAdapter responsible for updating its recyclerview
+        TaskItemAdapter adapter = mAdapter.taskItemAdapters.get(task.category);
+        //if no such category, default to Work
+        if (adapter == null) {
+            adapter = mAdapter.taskItemAdapters.get("Work");
+        }
+        adapter.notifyItemInserted(adapter.taskList.size());
+        mAdapter.notifyChange(task.category);
+    }
 
     private void initRecyclerView() {
         //format the array into a taskcategorymodel
@@ -226,7 +272,7 @@ public class Fragment_Tasks extends Fragment {
         selectedTaskViewholder.progressBar.setProgressBackgroundTintList(ColorStateList.valueOf(getContext().getResources().getColor(previousBackgroundColorOfSelected)));
     }
 
-    public HashMap<String, Object> getCurrentTaskDetails(){
+    public HashMap<String, Object> getCurrentTaskDetails() {
         HashMap<String, Object> currentTask = new HashMap<>();
         currentTask.put("docID", selectedTask.docID);
         currentTask.put("category", selectedTask.category);

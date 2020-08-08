@@ -79,4 +79,5 @@
     <string name="add_event_update_datetime_dialog_positive_button_text">"Update"</string>
     <string name="settings">Settings</string>
     <string name="feedback_dialog_question">How was your session?</string>
+    <string name="add_task_error_no_title">Your task needs a title!</string>
 </resources>

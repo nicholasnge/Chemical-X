@@ -127,7 +127,7 @@ public class AddTask extends DialogFragment {
             @Override
             public void onClick(View v) {
                 if (taskTitle.getText().toString().isEmpty()){
-                    Snackbar.make(view, "Your task needs a title!", BaseTransientBottomBar.LENGTH_SHORT).show();
+                    Snackbar.make(view, R.string.add_task_error_no_title, BaseTransientBottomBar.LENGTH_SHORT).show();
                     return;
                 }
 
@@ -215,7 +215,7 @@ public class AddTask extends DialogFragment {
         }
     }
 
-    private int getSeconds(int progress) {
+    public int getSeconds(int progress) {
         int minutes = 0;
 
         //if duration exceeds 3hours, each ticker is 30 mins beyond 3 hours
