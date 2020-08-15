@@ -1,5 +1,6 @@
 package com.example.chemicalx.Fragment_Tasks;
 
+import com.example.chemicalx.Category;
 import com.google.firebase.Timestamp;
 
 public class TaskItemModel {
@@ -9,7 +10,7 @@ public class TaskItemModel {
     int totalTime;// in seconds
     int timePassed;// in seconds
     int progressBar;
-    Timestamp dueDate;
+    public Timestamp dueDate;
 
 
     public TaskItemModel(String docID, String title, String category, int totalTime, int timePassed, Timestamp dueDate) {
@@ -30,4 +31,5 @@ public class TaskItemModel {
     public String getTitle() {
         return title;
     }
+    public String getCategory(){ return category;}
 }

@@ -24,11 +24,13 @@ import androidx.fragment.app.DialogFragment;
 import com.example.chemicalx.Fragment_Tasks.crollerTest.Croller;
 import com.example.chemicalx.Fragment_Tasks.crollerTest.OnCrollerChangeListener;
 import com.example.chemicalx.R;
+import com.example.chemicalx.TextClassificationClient;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.Timestamp;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -43,7 +45,6 @@ import java.util.Map;
 
 public class AddTask extends DialogFragment {
     View view;
-    FirebaseFirestore db;
     EditText taskTitle;
     Croller croller;
     TextView taskDuration;
@@ -53,8 +54,11 @@ public class AddTask extends DialogFragment {
     Button createTaskButton;
     int durationHours;
     int durationTenMinutes;
+    //for tf model
+    TextClassificationClient tf_classifytasks;
 
-    public AddTask() {
+    public AddTask(TextClassificationClient tf_classifytasks) {
+        this.tf_classifytasks = tf_classifytasks;
     }
 
     @Override
@@ -118,28 +122,32 @@ public class AddTask extends DialogFragment {
 
     private void setupSubmitButton() {
         // set up submit button
-        db = FirebaseFirestore.getInstance();
         createTaskButton = view.findViewById(R.id.createTaskButton);
         createTaskButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (taskTitle.getText().toString().isEmpty()){
-                    Snackbar.make(view, "Your task needs a title!", BaseTransientBottomBar.LENGTH_SHORT).show();
+                    Snackbar.make(view, R.string.add_task_error_no_title, BaseTransientBottomBar.LENGTH_SHORT).show();
                     return;
                 }
+
                 //pass data back
                 Map<String, Object> task = new HashMap<>();
                 task.put("title", taskTitle.getText().toString());
-                task.put("category", categorySpinner.getSelectedItem().toString());
                 task.put("totalTime", getSeconds(croller.getProgress()));
                 task.put("timePassed", 0);
                 if (taskDueDate != null) {
                     task.put("dueDate", new Timestamp(taskDueDate));
                 }
+                // let tf choose category for user if tf specifies so
+                if (categorySpinner.getSelectedItem().toString().equals("What do you think?")){
+                    task.put("category", tf_classifytasks.classify(taskTitle.getText().toString()));
+                } else {
+                    task.put("category", categorySpinner.getSelectedItem().toString());
+                }
 
-                db.collection("users")
-                        // TODO: 6/25/2020 change to ID of current user
-                        .document("testuser")
+                FirebaseFirestore.getInstance().collection("users")
+                        .document(FirebaseAuth.getInstance().getCurrentUser().getUid())
                         .collection("tasks")
                         .add(task)
                         .addOnFailureListener(new OnFailureListener() {
@@ -207,7 +215,7 @@ public class AddTask extends DialogFragment {
         }
     }
 
-    private int getSeconds(int progress) {
+    public int getSeconds(int progress) {
         int minutes = 0;
 
         //if duration exceeds 3hours, each ticker is 30 mins beyond 3 hours

@@ -28,10 +28,11 @@
                 android:layout_height="?attr/actionBarSize">
 
                 <TextView
-                    android:id="@+id/settings_toolbar_text"
+                    android:id="@+id/settings_toolbarText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Settings"
+                    android:fontFamily="@font/grand_hotel"
+                    android:text="@string/settings"
                     android:textColor="#FFFFFF"
                     android:textSize="26sp" />
 

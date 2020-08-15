@@ -14,4 +14,8 @@ public class TaskCategoryModel {
         this.backgroundColor = backgroundColor;
         this.progressColor = progressColor;
     }
+
+    public void add(TaskItemModel task) {
+        taskList.add(task);
+    }
 }
