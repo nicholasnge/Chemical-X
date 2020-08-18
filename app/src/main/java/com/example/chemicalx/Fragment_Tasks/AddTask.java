@@ -136,9 +136,12 @@ public class AddTask extends DialogFragment {
                 task.put("title", taskTitle.getText().toString());
                 task.put("totalTime", getSeconds(croller.getProgress()));
                 task.put("timePassed", 0);
-                if (taskDueDate != null) {
-                    task.put("dueDate", new Timestamp(taskDueDate));
+                if (taskDueDate == null) {
+                    Calendar maxTimeCalendar = Calendar.getInstance();
+                    maxTimeCalendar.add(Calendar.YEAR, 200);
+                    taskDueDate = maxTimeCalendar.getTime();
                 }
+                task.put("dueDate", new Timestamp(taskDueDate));
                 // let tf choose category for user if tf specifies so
                 if (categorySpinner.getSelectedItem().toString().equals("What do you think?")){
                     task.put("category", tf_classifytasks.classify(taskTitle.getText().toString()));

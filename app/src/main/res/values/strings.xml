@@ -43,9 +43,13 @@
 
     <string name="delete_account_setting_dialog_title">"Delete Account?"</string>
     <string name="field_password_hint">"Password"</string>
-    <string name="delete_account_setting_dialog_message">"This will permanently delete your scheduler.\n\nType in your password to confirm."</string>
+    <string name="delete_account_setting_dialog_message">"This will permanently delete your account and all your data, including your scheduler.\n\nType in your password to confirm."</string>
     <string name="delete_account_setting_dialog_affirmative">"Delete account"</string>
     <string name="cancel">"Cancel"</string>
+
+    <string name="delete_ml_training_data_setting_dialog_title">"Delete Machine Learning Training Data?"</string>
+    <string name="delete_ml_training_data_setting_dialog_message">"This will permanently delete all of the machine learning training data that is currently on your device."</string>
+    <string name="delete_ml_training_data_setting_dialog_affirmative">"Delete data"</string>
 
     <string name="schedule_read_calendar_disabled_text">"The schedule tab is disabled because the permission may not be granted for Chemical X to read from your Calendar.\n\nIf you want to grant the permission manually, go to\nSettings > Apps > Chemical X > App Settings: Permissions\nand tap on Calendar.\n\nTap the button below if you want to go straight to the Chemical X page in your device settings."</string>
     <string name="schedule_read_calendar_disabled_grant_permission_button_text">"Chemical X Device Settings"</string>

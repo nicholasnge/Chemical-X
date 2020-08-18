@@ -61,7 +61,7 @@ import com.google.firebase.firestore.QuerySnapshot;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, FirebaseAuth.AuthStateListener,
-        ReadCalendarPermissionDialogFragment.ReadCalendarPermissionDialogListener, FeedbackDialog.FeedbackDialogListener {
+        ReadCalendarPermissionDialogFragment.ReadCalendarPermissionDialogListener {
     public static final String TAG = "MainActivity";
     public static final int APPUSAGE_REQUEST_CODE = 1;
     private Toolbar toolbar;
@@ -70,13 +70,10 @@ public class MainActivity extends AppCompatActivity
     private ViewPagerAdapter viewPagerAdapter;
     private GoogleSignInClient googleSignInClient;
 
-    //tasks fragment
+    // tasks fragment
     Fragment_Tasks task_fragment;
     FirebaseFirestore db;
     public ArrayList<TaskItemModel> tasks = new ArrayList<>();
-
-    //schedule fragment
-    public ArrayList<TimeLineModel> scheduleList;
 
     NavigationView navView;
     DrawerLayout drawerLayout;
@@ -84,7 +81,7 @@ public class MainActivity extends AppCompatActivity
 
     private Fragment_Schedule schedule_fragment;
 
-    //for tf modelf
+    // for tf model
     public TextClassificationClient tf_classifytasks;
 
     @Override
@@ -331,31 +328,6 @@ public class MainActivity extends AppCompatActivity
     public void onReadCalendarPermissionDialogDenyClick(DialogFragment dialog) {
         dialog.getDialog().cancel();
     }
-
-    @Override
-    public void onFeedbackClick(DialogFragment dialog, int which, HashMap<String, Object> currentTask) {
-        if (scheduleList == null){
-            Toast.makeText(this, "error: feedback not saved", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        ArrayList<HashMap<String,Object>> schedule = new ArrayList<>();
-        for (TimeLineModel tlm : scheduleList){
-            HashMap<String,Object> tlm_ = new HashMap<>();
-            tlm_.put("category", tlm.category);
-            tlm_.put("timeStart", new Timestamp(new Date(tlm.dtstart)));
-            tlm_.put("timeEnd", new Timestamp(new Date(tlm.dtend)));
-            schedule.add(tlm_);
-        }
-        currentTask.put("schedule", schedule);
-        // 0,1,2 corresponding to productive, average, and unproductive
-        currentTask.put("productivity", which);
-
-        FirebaseFirestore.getInstance().collection("users")
-                .document(FirebaseAuth.getInstance().getUid())
-                .collection("history")
-                .add(currentTask);
-    }
-
 
     private void getTasks() {
         db = FirebaseFirestore.getInstance();

@@ -13,6 +13,16 @@
     </PreferenceCategory>
 
     <PreferenceCategory
+        android:key="privacy"
+        android:title="Privacy">
+
+        <Preference
+            android:key="delete_ml_training_data"
+            android:title="Delete Machine Learning Training Data"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
         android:key="account"
         android:title="Account">
 

@@ -1,7 +1,6 @@
 package com.example.chemicalx.Fragment_Tasks;
 
 import android.app.Dialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 
@@ -17,12 +16,14 @@ public class FeedbackDialog extends DialogFragment {
     FeedbackDialogListener listener;
     HashMap<String, Object> currentTask;
 
-    public FeedbackDialog(HashMap<String, Object> currentTask) {
+    public FeedbackDialog(FeedbackDialogListener listener, HashMap<String, Object> currentTask) {
+        this.listener = listener;
         this.currentTask = currentTask;
     }
 
     public interface FeedbackDialogListener {
         public void onFeedbackClick(DialogFragment dialog, int which, HashMap<String, Object> currentTask);
+        public void onCancel(DialogFragment dialog, HashMap<String, Object> currentTask);
     }
 
     @Override
@@ -40,19 +41,23 @@ public class FeedbackDialog extends DialogFragment {
         return builder.create();
 
     }
+//    @Override
+//    public void onAttach(Context context) {
+//        super.onAttach(context);
+//        // Verify that the host activity implements the callback interface
+//        try {
+//            // Instantiate the NoticeDialogListener so we can send events to the host
+//            listener = (FeedbackDialogListener) context;
+//        } catch (ClassCastException e) {
+//            // The activity doesn't implement the interface, throw exception
+//            throw new ClassCastException(getActivity().toString()
+//                    + " must implement NoticeDialogListener");
+//        }
+//    }
     @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        // Verify that the host activity implements the callback interface
-        try {
-            // Instantiate the NoticeDialogListener so we can send events to the host
-            listener = (FeedbackDialogListener) context;
-        } catch (ClassCastException e) {
-            // The activity doesn't implement the interface, throw exception
-            throw new ClassCastException(getActivity().toString()
-                    + " must implement NoticeDialogListener");
-        }
+    public void onCancel(DialogInterface dialog) {
+        listener.onCancel(this, this.currentTask);
+        super.onCancel(dialog);
     }
-
 }
 

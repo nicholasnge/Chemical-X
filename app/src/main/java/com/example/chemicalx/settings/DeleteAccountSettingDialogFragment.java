@@ -24,19 +24,8 @@ public class DeleteAccountSettingDialogFragment extends DialogFragment {
         public void onDeleteAccountSettingDialogCancelClick(DialogFragment dialog);
     }
 
-    // Override the Fragment.onAttach() method to instantiate the DeleteAccountSettingDialogListener
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        // Verify that the host activity implements the callback interface
-        try {
-            // Instantiate the DeleteAccountSettingDialogListener so we can send events to the host
-            listener = (DeleteAccountSettingDialogListener) context;
-        } catch (ClassCastException e) {
-            // The activity doesn't implement the interface, throw exception
-            throw new ClassCastException(context.toString()
-                    + " must implement DeleteAccountSettingDialogListener");
-        }
+    public DeleteAccountSettingDialogFragment(DeleteAccountSettingDialogListener listener) {
+        this.listener = listener;
     }
 
     @Override
