@@ -12,6 +12,7 @@ import androidx.preference.PreferenceFragmentCompat;
 
 import com.example.chemicalx.FirebaseLoginActivity;
 import com.example.chemicalx.R;
+import com.example.chemicalx.tasksuggester.TaskSuggester;
 import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -42,21 +43,39 @@ public class SettingsFragment extends PreferenceFragmentCompat
             }
         });
 
+        Preference trainTaskSuggesterModelManually = getPreferenceManager()
+                .findPreference("train_task_suggester_model_online_manually");
+        trainTaskSuggesterModelManually
+                .setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                    @Override
+                    public boolean onPreferenceClick(Preference preference) {
+                        // TODO: Dialog for this?
+//                        DeleteMLTrainingDataSettingDialogFragment deleteMLTrainingDataSettingDialogFragment =
+//                                new DeleteMLTrainingDataSettingDialogFragment();
+//
+//                        deleteMLTrainingDataSettingDialogFragment.show(getParentFragmentManager(),
+//                                "Delete ML Training Data Setting Dialog Fragment");
+                        TaskSuggester.trainModel(getContext());
+
+                        return false;
+                    }
+                });
+
         Preference deleteMLTrainingData = getPreferenceManager()
                 .findPreference("delete_ml_training_data");
         deleteMLTrainingData
                 .setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-            @Override
-            public boolean onPreferenceClick(Preference preference) {
-                DeleteMLTrainingDataSettingDialogFragment deleteMLTrainingDataSettingDialogFragment =
-                        new DeleteMLTrainingDataSettingDialogFragment();
+                    @Override
+                    public boolean onPreferenceClick(Preference preference) {
+                        DeleteMLTrainingDataSettingDialogFragment deleteMLTrainingDataSettingDialogFragment =
+                                new DeleteMLTrainingDataSettingDialogFragment();
 
-                deleteMLTrainingDataSettingDialogFragment.show(getParentFragmentManager(),
-                        "Delete ML Training Data Setting Dialog Fragment");
+                        deleteMLTrainingDataSettingDialogFragment.show(getParentFragmentManager(),
+                                "Delete ML Training Data Setting Dialog Fragment");
 
-                return false;
-            }
-        });
+                        return false;
+                    }
+                });
     }
 
     private void logout() {

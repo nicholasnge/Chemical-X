@@ -347,6 +347,7 @@ public class Fragment_Tasks extends Fragment implements FeedbackDialog.FeedbackD
     }
 
     public void completeTask(TaskItemAdapter.TodoViewHolder holder, TaskItemModel task) {
+        Timestamp submissionTime = new Timestamp(new Date());
         double timePassed = task.timePassed;
         double totalTime = task.totalTime;
         double productivityMultiplier = totalTime / timePassed;
@@ -358,8 +359,15 @@ public class Fragment_Tasks extends Fragment implements FeedbackDialog.FeedbackD
             double productivity = ((Number) taskDataPoint.get("productivity")).doubleValue();
             productivity *= productivityMultiplier;
             taskDataPoint.put("productivity", productivity);
+            taskDataPoint.put("submissionTime", submissionTime);
+            // to user's own dataset
             FirebaseFirestore.getInstance().collection("users")
                     .document(FirebaseAuth.getInstance().getCurrentUser().getUid())
+                    .collection("unusedTrainData")
+                    .add(taskDataPoint);
+            // to base user's dataset
+            FirebaseFirestore.getInstance().collection("users")
+                    .document("base_user")
                     .collection("unusedTrainData")
                     .add(taskDataPoint);
         }
@@ -713,8 +721,8 @@ public class Fragment_Tasks extends Fragment implements FeedbackDialog.FeedbackD
                 String dataKey;
                 while (dataKeysIterator.hasNext()) {
                     dataKey = dataKeysIterator.next();
-                    Object data = taskDataPointJSONObject.get(dataKey);
-                    if (dataKey == "pastEvents") {
+                    Object data;
+                    if (dataKey.equals("pastEvents")) {
                         List<Map<String, Object>> peList = new ArrayList<>();
                         JSONArray pastEventsJSONArray = taskDataPointJSONObject
                                 .getJSONArray(dataKey);
@@ -732,6 +740,8 @@ public class Fragment_Tasks extends Fragment implements FeedbackDialog.FeedbackD
                             peList.add(pastEventMap);
                         }
                         data = peList;
+                    } else {
+                        data = taskDataPointJSONObject.get(dataKey);
                     }
                     taskDataPointMap.put(dataKey, data);
                 }

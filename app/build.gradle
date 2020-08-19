@@ -83,6 +83,9 @@ dependencies {
     // for preferences package for settings
     def preference_version = "1.1.1"
     implementation "androidx.preference:preference:$preference_version"
+
+    // for Volley; to make HTTP requests
+    implementation 'com.android.volley:volley:1.1.1'
 }
 repositories {
     mavenCentral()
