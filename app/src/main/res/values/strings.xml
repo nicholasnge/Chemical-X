@@ -81,7 +81,17 @@
 
     <string name="add_event_update_datetime_dialog_title">"Update Date and/or Time"</string>
     <string name="add_event_update_datetime_dialog_positive_button_text">"Update"</string>
+
     <string name="settings">Settings</string>
+
     <string name="feedback_dialog_question">How was your session?</string>
     <string name="add_task_error_no_title">Your task needs a title!</string>
+
+    <string name="request_task_suggestion_dialog_title">"Request Task Suggestion"</string>
+    <string name="request_task_suggestion_dialog_message">"If you want to know which task you are likely to do most productively within a certain duration, you can request for a suggestion.\n\nInput the desired duration for this task."</string>
+    <string name="request_task_suggestion_dialog_positive_button_text">"Request"</string>
+
+    <string name="task_suggestion_result_dialog_title">"Task Suggestion"</string>
+    <string name="task_suggestion_result_dialog_failed_request_message">"No task can be suggested at this time. You may not have any tasks to do, or there was an error processing your request. We apologise; please try again later."</string>
+    <string name="okay">"Okay"</string>
 </resources>

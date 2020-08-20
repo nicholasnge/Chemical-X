@@ -3,7 +3,6 @@ package com.example.chemicalx.Fragment_Tasks;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,19 +34,6 @@ public class PastEvent implements Comparable<PastEvent> {
 
         long timeSinceEvent = startOfNextFreeTime - this.dtend;
         double normalisedTimeSinceEvent = 2.0 * Math.atan(((double) timeSinceEvent) / 1000 / 60 / 60 / 24) / Math.PI;
-
-        pastEventMap.put("eventCategory", this.eventCategory);
-        pastEventMap.put("eventDuration", this.normalisedEventDuration);
-        pastEventMap.put("timeSinceEvent", normalisedTimeSinceEvent);
-
-        return pastEventMap;
-    }
-
-    public Map<String, Object> getTaskSuggesterInputDataMap(long startOfNextFreeTime) {
-        Map<String, Object> pastEventMap = new HashMap<>();
-
-        long timeSinceEvent = startOfNextFreeTime - this.dtend;
-        double normalisedTimeSinceEvent = Math.tanh(Math.log((double) timeSinceEvent));
 
         pastEventMap.put("eventCategory", this.eventCategory);
         pastEventMap.put("eventDuration", this.normalisedEventDuration);

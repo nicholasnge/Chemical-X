@@ -55,8 +55,6 @@ import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 
 
 public class Fragment_Tasks extends Fragment implements FeedbackDialog.FeedbackDialogListener {
@@ -570,6 +568,7 @@ public class Fragment_Tasks extends Fragment implements FeedbackDialog.FeedbackD
         }
 
         pastEventsList.sort(null);
+        savePastEventsList();
     }
 
     private void addPastEventToList(PastEvent pastEvent) {
@@ -579,6 +578,7 @@ public class Fragment_Tasks extends Fragment implements FeedbackDialog.FeedbackD
             pastEventsList = pastEventsList.subList(diff, size);
         }
         pastEventsList.add(pastEvent);
+        savePastEventsList();
     }
 
     private void addCompletedTaskSessionAsDataPoint(HashMap<String, Object> completedTaskSession,
@@ -659,6 +659,7 @@ public class Fragment_Tasks extends Fragment implements FeedbackDialog.FeedbackD
         }
 
         addCompletedTaskSessionAsDataPoint(currentTask, productivity);
+        saveDataPointsMap();
 
 //        if (scheduleList == null){
 //            Toast.makeText(this, "error: feedback not saved", Toast.LENGTH_SHORT).show();
@@ -687,6 +688,7 @@ public class Fragment_Tasks extends Fragment implements FeedbackDialog.FeedbackD
         double productivity = 1.0;
 
         addCompletedTaskSessionAsDataPoint(currentTask, productivity);
+        saveDataPointsMap();
     }
 
     private Map<String, List<Map<String, Object>>> initialiseDataPointsMap() {

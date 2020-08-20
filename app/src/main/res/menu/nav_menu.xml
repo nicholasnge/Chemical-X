@@ -12,6 +12,10 @@
                 android:icon="@drawable/add"
                 android:title="Add Task" />
             <item
+                android:id="@+id/suggestTask"
+                android:icon="@drawable/ic_molecular"
+                android:title="Suggest Task" />
+            <item
                 android:id="@+id/sync"
                 android:icon="@drawable/sync"
                 android:title="Sync" />
