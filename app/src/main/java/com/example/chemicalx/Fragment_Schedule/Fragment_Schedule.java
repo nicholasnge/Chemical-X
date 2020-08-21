@@ -3,12 +3,19 @@ package com.example.chemicalx.Fragment_Schedule;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlarmManager;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.ContentResolver;
 import android.content.ContentUris;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.CalendarContract;
@@ -22,6 +29,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -111,6 +120,7 @@ public class Fragment_Schedule extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        createNotificationChannel();
     }
 
     @Override
@@ -427,6 +437,11 @@ public class Fragment_Schedule extends Fragment {
                 timeLineModel = new TimeLineModel(t.getTitle(), mDataList.get(i).dtend, mDataList.get(i+1).dtstart, OrderStatus.INACTIVE, t.getCategory(), true);
                 toBeAdded.add(timeLineModel);
             }
+
+            if (toBeAdded.size() > 0){
+                // schedule notification for the next and only next task
+                triggerNotification(toBeAdded.get(0).message, toBeAdded.get(0).dtstart);
+            }
         }
         mDataList.addAll(toBeAdded);
         mDataList.sort(null);
@@ -452,5 +467,33 @@ public class Fragment_Schedule extends Fragment {
     public void updateTimelineRecyclerView() {
         setDataListItems();
         mAdapter.notifyDataSetChanged();
+    }
+
+    private void triggerNotification(String task, long time){
+        Log.d("TRIGGER NOTIF", " HEAR HEAR");
+        Intent intent = new Intent(getActivity(), ScheduleBroadcastReceiver.class);
+        intent.putExtra("task", task);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(getActivity(), 0, intent, 0);
+
+        AlarmManager alarmManager = (AlarmManager) getActivity().getSystemService(Context.ALARM_SERVICE);
+        alarmManager.set(AlarmManager.RTC_WAKEUP, time, pendingIntent);
+        Log.d("TRIGGER NOTIF", time + "");
+    }
+
+    private void createNotificationChannel() {
+        // Create the NotificationChannel, but only on API 26+ because
+        // the NotificationChannel class is new and not in the support library
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = "Schedule Channel";
+            String description = "Channel to remind users during the day of tasks they might want to complete";
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            NotificationChannel channel = new NotificationChannel("SCHEDULE_CHANNEL", name, importance);
+            channel.setDescription(description);
+            channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
+            // Register the channel with the system; you can't change the importance
+            // or other notification behaviors after this
+            NotificationManager notificationManager = getActivity().getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
     }
 }

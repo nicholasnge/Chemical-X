@@ -89,7 +89,6 @@ public class Fragment_Tasks extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        createNotificationChannel();
     }
 
     @Override
@@ -106,7 +105,6 @@ public class Fragment_Tasks extends Fragment {
             public void onClick(View v) {
                 DialogFragment addTodo = new AddTask(tf_classifytasks);
                 addTodo.show(getChildFragmentManager(), "tag");
-                triggerNotification();
             }
         });
 
@@ -115,42 +113,6 @@ public class Fragment_Tasks extends Fragment {
 
         return view;
     }
-
-    private void triggerNotification(){
-        Intent intent = new Intent(getActivity(), MainActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(getActivity(), 0, intent, 0);
-
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(getActivity(), "CHANNEL_ID")
-                .setSmallIcon(R.drawable.ic_molecular)
-                .setContentTitle("ChemicAL X")
-                .setContentText("you have a task that needs to be completed!")
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-                .setContentIntent(pendingIntent)
-                .setAutoCancel(true);
-
-        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(getActivity());
-        // notificationId is a unique int for each notification that you must define
-        notificationManager.notify(1, builder.build());
-    }
-
-    private void createNotificationChannel() {
-        // Create the NotificationChannel, but only on API 26+ because
-        // the NotificationChannel class is new and not in the support library
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            CharSequence name = "chemical channel";
-            String description = "chemical channel desc";
-            int importance = NotificationManager.IMPORTANCE_DEFAULT;
-            NotificationChannel channel = new NotificationChannel("CHANNEL_ID", name, importance);
-            channel.setDescription(description);
-            channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
-            // Register the channel with the system; you can't change the importance
-            // or other notification behaviors after this
-            NotificationManager notificationManager = getActivity().getSystemService(NotificationManager.class);
-            notificationManager.createNotificationChannel(channel);
-        }
-    }
-
 
     public void addTask(TaskItemModel task) {
         switch (task.category) {
