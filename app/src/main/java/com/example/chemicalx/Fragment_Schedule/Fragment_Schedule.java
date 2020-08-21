@@ -226,10 +226,6 @@ public class Fragment_Schedule extends Fragment {
 
         // move earlier events nearer to the start of the list
         mDataList.sort(null);
-
-        // pass the schedule list to Main in a terribly bad practices way
-        MainActivity main = (MainActivity)getActivity();
-        main.scheduleList = (ArrayList<TimeLineModel>)mDataList.clone();
     }
 
     private void assignViews(View view) {
@@ -410,7 +406,7 @@ public class Fragment_Schedule extends Fragment {
     public void addTasks() {
         List<TaskItemModel> tasks = ((MainActivity)getActivity()).tasks;
 //        if (tasks.size() > 0){
-//            //TODO replace with AI
+//            // TODO replace with AI
 //            tasks_added = true;
 //        }
 

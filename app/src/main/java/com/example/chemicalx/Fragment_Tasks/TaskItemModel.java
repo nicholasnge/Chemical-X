@@ -31,5 +31,16 @@ public class TaskItemModel {
     public String getTitle() {
         return title;
     }
-    public String getCategory(){ return category;}
+
+    public String getCategory() {
+        return category;
+    }
+
+    public int getTotalTime() {
+        return totalTime;
+    }
+
+    public int getTimePassed() {
+        return timePassed;
+    }
 }
