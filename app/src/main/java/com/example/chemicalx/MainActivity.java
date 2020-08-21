@@ -10,7 +10,6 @@ import android.provider.Settings;
 import android.util.Log;
 import android.view.MenuItem;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -25,20 +24,19 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
+import java.util.Calendar;
 import java.util.List;
 
 import com.example.chemicalx.Fragment_Schedule.Fragment_Schedule;
 import com.example.chemicalx.Fragment_Schedule.ReadCalendarPermissionDialogFragment;
 import com.example.chemicalx.Fragment_Insights.Fragment_Insights;
-import com.example.chemicalx.Fragment_Schedule.TimeLineModel;
-import com.example.chemicalx.Fragment_Tasks.FeedbackDialog;
 import com.example.chemicalx.Fragment_Tasks.Fragment_Tasks;
 import com.example.chemicalx.Fragment_Tasks.TaskItemModel;
 import com.example.chemicalx.settings.SettingsActivity;
+import com.example.chemicalx.tasksuggester.RequestTaskSuggestionDialogFragment;
+import com.example.chemicalx.tasksuggester.TaskSuggester;
+import com.example.chemicalx.tasksuggester.TaskSuggestionResultDialogFragment;
 import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -49,7 +47,6 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.tabs.TabLayout;
-import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.GetTokenResult;
 import com.google.firebase.firestore.DocumentChange;
@@ -61,7 +58,9 @@ import com.google.firebase.firestore.QuerySnapshot;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, FirebaseAuth.AuthStateListener,
-        ReadCalendarPermissionDialogFragment.ReadCalendarPermissionDialogListener, FeedbackDialog.FeedbackDialogListener {
+        ReadCalendarPermissionDialogFragment.ReadCalendarPermissionDialogListener,
+        RequestTaskSuggestionDialogFragment.RequestTaskSuggestionDialogListener,
+        TaskSuggester.TaskSuggestionResponseListener {
     public static final String TAG = "MainActivity";
     public static final int APPUSAGE_REQUEST_CODE = 1;
     private Toolbar toolbar;
@@ -70,13 +69,10 @@ public class MainActivity extends AppCompatActivity
     private ViewPagerAdapter viewPagerAdapter;
     private GoogleSignInClient googleSignInClient;
 
-    //tasks fragment
+    // tasks fragment
     Fragment_Tasks task_fragment;
     FirebaseFirestore db;
-    public ArrayList<TaskItemModel> tasks = new ArrayList<>();
-
-    //schedule fragment
-    public ArrayList<TimeLineModel> scheduleList;
+    public static ArrayList<TaskItemModel> tasks = new ArrayList<>();
 
     NavigationView navView;
     DrawerLayout drawerLayout;
@@ -84,7 +80,7 @@ public class MainActivity extends AppCompatActivity
 
     private Fragment_Schedule schedule_fragment;
 
-    //for tf modelf
+    // for tf model
     public TextClassificationClient tf_classifytasks;
 
     @Override
@@ -199,6 +195,12 @@ public class MainActivity extends AppCompatActivity
             case R.id.settings:
                 Intent toSettings = new Intent(this, SettingsActivity.class);
                 startActivity(toSettings);
+                break;
+            case R.id.suggestTask:
+                RequestTaskSuggestionDialogFragment requestTaskSuggestionDialogFragment =
+                        new RequestTaskSuggestionDialogFragment(this);
+                requestTaskSuggestionDialogFragment.show(getSupportFragmentManager(),
+                        "Request Task Suggestion Dialog Fragment");
                 break;
             default:
         }
@@ -332,31 +334,6 @@ public class MainActivity extends AppCompatActivity
         dialog.getDialog().cancel();
     }
 
-    @Override
-    public void onFeedbackClick(DialogFragment dialog, int which, HashMap<String, Object> currentTask) {
-        if (scheduleList == null){
-            Toast.makeText(this, "error: feedback not saved", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        ArrayList<HashMap<String,Object>> schedule = new ArrayList<>();
-        for (TimeLineModel tlm : scheduleList){
-            HashMap<String,Object> tlm_ = new HashMap<>();
-            tlm_.put("category", tlm.category);
-            tlm_.put("timeStart", new Timestamp(new Date(tlm.dtstart)));
-            tlm_.put("timeEnd", new Timestamp(new Date(tlm.dtend)));
-            schedule.add(tlm_);
-        }
-        currentTask.put("schedule", schedule);
-        // 0,1,2 corresponding to productive, average, and unproductive
-        currentTask.put("productivity", which);
-
-        FirebaseFirestore.getInstance().collection("users")
-                .document(FirebaseAuth.getInstance().getUid())
-                .collection("history")
-                .add(currentTask);
-    }
-
-
     private void getTasks() {
         db = FirebaseFirestore.getInstance();
         db.collection("users")
@@ -395,6 +372,29 @@ public class MainActivity extends AppCompatActivity
                     }
 
                 });
+    }
+
+    @Override
+    public void onRequestTaskSuggestionDialogRequestClick(DialogFragment dialog, int durationInMinutes) {
+        long nowMillis = Calendar.getInstance().getTimeInMillis();
+        TaskSuggester.suggestTask(this, this, tf_classifytasks, tasks, durationInMinutes, nowMillis);
+    }
+
+    @Override
+    public void onTaskSuggestionResponse(int taskIndex, int durationInMinutes) {
+        int numOfHours = durationInMinutes / 60;
+        int numOfMinutes = durationInMinutes % 60;
+        TaskSuggestionResultDialogFragment taskSuggestionResultDialogFragment;
+        if (taskIndex < 0) {
+            taskSuggestionResultDialogFragment = new TaskSuggestionResultDialogFragment(
+                    null, numOfHours, numOfMinutes);
+        } else {
+            TaskItemModel task = tasks.get(taskIndex);
+            taskSuggestionResultDialogFragment = new TaskSuggestionResultDialogFragment(
+                    task, numOfHours, numOfMinutes);
+        }
+        taskSuggestionResultDialogFragment.show(getSupportFragmentManager(),
+                "Task Suggestion Result Dialog Fragment");
     }
 }
 
