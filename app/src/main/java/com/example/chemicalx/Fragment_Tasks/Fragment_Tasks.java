@@ -62,7 +62,7 @@ public class Fragment_Tasks extends Fragment implements FeedbackDialog.FeedbackD
     private static final String PAST_EVENTS_DATA_FILENAME = "data/ml_training/past_events_data.json";
     private static final String DATA_POINTS_FILENAME = "data/ml_training/data_points.json";
     private static final double PRODUCTIVITY_FACTOR = 2;
-    private static final int PAST_EVENTS_QUEUE_MAX_SIZE = 168;
+    private static final int PAST_EVENTS_LIST_MAX_SIZE = 168;
 
     ArrayList<TaskItemModel> raw_tasks;
     private ArrayList<TaskCategoryModel> mDataList = new ArrayList<>();
@@ -571,8 +571,8 @@ public class Fragment_Tasks extends Fragment implements FeedbackDialog.FeedbackD
 
     private void addPastEventToList(PastEvent pastEvent) {
         int size = pastEventsList.size();
-        if (size >= PAST_EVENTS_QUEUE_MAX_SIZE) {
-            int diff = size - PAST_EVENTS_QUEUE_MAX_SIZE + 1;
+        if (size >= PAST_EVENTS_LIST_MAX_SIZE) {
+            int diff = size + 1 - PAST_EVENTS_LIST_MAX_SIZE;
             pastEventsList = pastEventsList.subList(diff, size);
         }
         pastEventsList.add(pastEvent);

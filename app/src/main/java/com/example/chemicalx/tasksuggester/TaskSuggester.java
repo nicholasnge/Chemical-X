@@ -27,8 +27,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -44,6 +46,7 @@ public class TaskSuggester {
     private static final String BASE_USER_ID = "base_user";
     private static final long TIME_UNTIL_SWITCH_MODEL = 30L * 24 * 60 * 60 * 1000;
     private static final int FAILED_TASK_SUGGESTION_TASK_INDEX = -1;
+    private static final int PAST_EVENTS_LIST_MAX_SIZE = 168;
 
     // Projection arrays. Creating indices for these arrays instead of doing
     // dynamic lookups improves performance.
@@ -250,6 +253,7 @@ public class TaskSuggester {
             Log.e(TAG, "Past events could not be loaded.\n" + e.getMessage());
             peList = constructPastEventsListFromCalendar(context, tf_classifytasks);
         }
+        peList = updatePastEventsList(context, tf_classifytasks, peList);
         return peList;
     }
 
@@ -347,119 +351,120 @@ public class TaskSuggester {
         return peList;
     }
 
-//    private static JSONArray initialisePastEventsJSON(Context context, TextClassificationClient tf_classifytasks) throws JSONException {
-//        JSONArray pastEventsJSONArray;
-//        try {
-//            pastEventsJSONArray = getPastEventsJSONFromFile(context);
-//        } catch (IOException e) {
-//            Log.e(TAG, "Past events could not be loaded.\n" + e.getMessage());
-//            List<PastEvent> peList = constructPastEventsListFromCalendar(context, tf_classifytasks);
-//            pastEventsJSONArray = constructPastEventsJSONFromList(peList);
-//        }
-//        pastEventsJSONArray = processPastEventsJSONArray(pastEventsJSONArray);
-//        return pastEventsJSONArray;
-//    }
-//
-//    private static JSONArray processPastEventsJSONArray(JSONArray pastEventsJSONArray) throws JSONException {
-//        JSONArray normalisedPastEventsJSONArray;
-//        int size = pastEventsJSONArray.length();
-//        for (int i = 0; i < size; i++) {
-//            JSONObject pastEventJSONObject = normalisedPastEventsJSONArray.getJSONObject(i);
-//            long eventDuration = (long) pastEventJSONObject.get("eventDuration");
-//            long
-//        }
-//    }
-//
-//    private static JSONArray getPastEventsJSONFromFile(Context context) throws IOException, JSONException {
-//        File pastEventsFile = new File(context.getFilesDir(), PAST_EVENTS_DATA_FILENAME);
-//        StringBuilder stringBuilder = new StringBuilder();
-//        FileReader fileReader = new FileReader(pastEventsFile);
-//        BufferedReader bufferedReader = new BufferedReader(fileReader);
-//        String line = bufferedReader.readLine();
-//        while (line != null){
-//            stringBuilder.append(line).append("\n");
-//            line = bufferedReader.readLine();
-//        }
-//        bufferedReader.close();
-//        String response = stringBuilder.toString();
-//        return new JSONArray(response);
-//    }
-//
-//    private static JSONArray constructPastEventsJSONFromList(List<PastEvent> peList) throws JSONException {
-//        JSONArray pastEventsJSONArray = new JSONArray();
-//        for (PastEvent pastEvent : peList) {
-//            pastEventsJSONArray.put(pastEvent.getJSONObject());
-//        }
-//        return pastEventsJSONArray;
-//    }
-//
-//    private static List<PastEvent> constructPastEventsListFromCalendar(Context context, TextClassificationClient tf_classifytasks) {
-//        List<PastEvent> peList = new ArrayList<>();
-//
-//        // one week ago from today
-//        Calendar oneWeekAgo = Calendar.getInstance();
-//        oneWeekAgo.add(Calendar.DATE, -7);
-//
-//        // the exact moment right now
-//        Calendar now = Calendar.getInstance();
-//
-//        // Run query
-//        ContentResolver cr = context.getContentResolver();
-//        Uri uri = CalendarContract.Instances.CONTENT_URI;
-//
-//        // Construct the query with the desired date range.
-//        Uri.Builder builder = uri.buildUpon();
-//        ContentUris.appendId(builder, oneWeekAgo.getTimeInMillis());
-//        ContentUris.appendId(builder, now.getTimeInMillis());
-//
-//        // Submit the query and get a Cursor object back.
-//        // method called only after READ_CALENDAR permission obtained so can suppress
-//        @SuppressLint("MissingPermission")
-//        Cursor cur = cr.query(builder.build(), INSTANCE_PROJECTION, null, null, null);
-//
-//        // Use the cursor to step through the returned records
-//        while (cur.moveToNext()) {
-//            String title;
-//            long dtstart; // UTC ms since the oneWeekAgo of the epoch
-//            long dtend;
-//
-//            String eventCategory;
-//            int eventCategoryIndex;
-//            long eventDuration;
-//
-//            // Get the field values
-//            title = cur.getString(PROJECTION_TITLE_INDEX);
-//            dtstart = cur.getLong(PROJECTION_BEGIN_INDEX);
-//            dtend = cur.getLong(PROJECTION_END_INDEX);
-//
-//            // processing of values
-//            eventCategory = tf_classifytasks.classify(title);
-//
-//            switch(eventCategory) {
-//                case "Work":
-//                    eventCategoryIndex = 1;
-//                    break;
-//                case "Hobbies":
-//                    eventCategoryIndex = 2;
-//                    break;
-//                case "School":
-//                    eventCategoryIndex = 3;
-//                    break;
-//                case "Chores":
-//                    eventCategoryIndex = 4;
-//                    break;
-//                default:
-//                    eventCategoryIndex = 0;
-//            }
-//
-//            eventDuration = dtend - dtstart;
-//
-//            // add to data list
-//            peList.add(new PastEvent(eventCategoryIndex, eventDuration, dtend));
-//        }
-//
-//        peList.sort(null);
-//
-//        return peList;
-//    }
+    private static List<PastEvent> updatePastEventsList(Context context, TextClassificationClient tf_classifytasks, List<PastEvent> pastEventsList) {
+        int size = pastEventsList.size();
+        PastEvent lastPastEvent = pastEventsList.get(size - 1);
+        long lastPastEventEndTimeMillis = lastPastEvent.getEndTime();
+
+        // lastPastEventEndTime
+        Calendar lastPastEventEndTime = Calendar.getInstance();
+        lastPastEventEndTime.setTimeInMillis(lastPastEventEndTimeMillis);
+
+        // the exact moment right now
+        Calendar now = Calendar.getInstance();
+
+        // Run query
+        ContentResolver cr = context.getContentResolver();
+        Uri uri = CalendarContract.Instances.CONTENT_URI;
+
+        // Construct the query with the desired date range.
+        Uri.Builder builder = uri.buildUpon();
+        ContentUris.appendId(builder, lastPastEventEndTime.getTimeInMillis());
+        ContentUris.appendId(builder, now.getTimeInMillis());
+
+        // Submit the query and get a Cursor object back.
+        // method called only after READ_CALENDAR permission obtained so can suppress
+        @SuppressLint("MissingPermission")
+        Cursor cur = cr.query(builder.build(), INSTANCE_PROJECTION, null, null, null);
+
+        // Use the cursor to step through the returned records
+        while (cur.moveToNext()) {
+            String title;
+            long dtstart; // UTC ms since the lastPastEventEndTime of the epoch
+            long dtend;
+
+            String eventCategory;
+            int eventCategoryIndex;
+            long eventDuration;
+
+            // Get the field values
+            title = cur.getString(PROJECTION_TITLE_INDEX);
+            dtstart = cur.getLong(PROJECTION_BEGIN_INDEX);
+            dtend = cur.getLong(PROJECTION_END_INDEX);
+
+            // processing of values
+            eventCategory = tf_classifytasks.classify(title);
+
+            switch(eventCategory) {
+                case "Work":
+                    eventCategoryIndex = 1;
+                    break;
+                case "Hobbies":
+                    eventCategoryIndex = 2;
+                    break;
+                case "School":
+                    eventCategoryIndex = 3;
+                    break;
+                case "Chores":
+                    eventCategoryIndex = 4;
+                    break;
+                default:
+                    eventCategoryIndex = 0;
+            }
+
+            eventDuration = dtend - dtstart;
+
+            // add to data list
+            addPastEventToList(context, pastEventsList, new PastEvent(eventCategoryIndex, eventDuration, dtend));
+        }
+
+        pastEventsList.sort(null);
+        savePastEventsList(context, pastEventsList);
+
+        return pastEventsList;
+    }
+
+    private static void addPastEventToList(Context context, List<PastEvent> pastEventsList, PastEvent pastEvent) {
+        int size = pastEventsList.size();
+        if (size >= PAST_EVENTS_LIST_MAX_SIZE) {
+            int diff = size + 1 - PAST_EVENTS_LIST_MAX_SIZE;
+            pastEventsList = pastEventsList.subList(diff, size);
+        }
+        pastEventsList.add(pastEvent);
+        savePastEventsList(context, pastEventsList);
+    }
+
+    private static void savePastEventsList(Context context, List<PastEvent> pastEventsList) {
+        try {
+            JSONArray pastEventsJSONArray = constructPastEventsJSONFromList(pastEventsList);
+            writePastEventsJSONToFile(context, pastEventsJSONArray);
+        } catch (IOException | JSONException e) {
+            Log.e(TAG, "Past events could not be saved.\n" + e.getMessage());
+            for (StackTraceElement stackTraceElement : e.getStackTrace()) {
+                Log.e(TAG, stackTraceElement.toString());
+            }
+        }
+    }
+
+    private static JSONArray constructPastEventsJSONFromList(List<PastEvent> peList) throws JSONException {
+        JSONArray pastEventsJSONArray = new JSONArray();
+        for (PastEvent pastEvent : peList) {
+            JSONObject pastEventJSONObject = pastEvent.getJSONObject();
+            pastEventsJSONArray.put(pastEventJSONObject);
+        }
+        return pastEventsJSONArray;
+    }
+
+    private static void writePastEventsJSONToFile(Context context, JSONArray pastEventsJSONArray) throws IOException {
+        // Convert JsonObject to String Format
+        String userString = pastEventsJSONArray.toString();
+        // Define the File Path and its Name
+        File file = new File(context.getFilesDir(), PAST_EVENTS_DATA_FILENAME);
+        file.getParentFile().mkdirs();
+        file.createNewFile();
+        FileWriter fileWriter = new FileWriter(file);
+        BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
+        bufferedWriter.write(userString);
+        bufferedWriter.close();
+    }
 }
