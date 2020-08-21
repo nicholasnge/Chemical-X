@@ -13,6 +13,20 @@
     </PreferenceCategory>
 
     <PreferenceCategory
+        android:key="machine_learning"
+        android:title="Machine Learning">
+
+        <Preference
+            android:key="train_task_suggester_model_online_manually"
+            android:title="Manually Train Model"/>
+
+        <Preference
+            android:key="delete_ml_training_data"
+            android:title="Delete Training Data"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
         android:key="account"
         android:title="Account">
 

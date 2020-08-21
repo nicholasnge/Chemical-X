@@ -3,6 +3,7 @@ package com.example.chemicalx;
 import android.content.Context;
 
 import androidx.test.core.app.ApplicationProvider;
+import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
 
@@ -12,6 +13,7 @@ import com.example.chemicalx.TextClassificationClient;
 import com.google.common.collect.Iterables;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -37,6 +39,13 @@ import static org.junit.Assert.assertEquals;
 public class AddTaskInstrumentedTest {
     private Context context = ApplicationProvider.getApplicationContext();
     AddTask addTask;
+
+    /**
+     * Use {@link ActivityScenarioRule} to create and launch the activity under test.
+     */
+    @Rule
+    public ActivityScenarioRule<MainActivity> activityScenarioRule =
+            new ActivityScenarioRule<MainActivity>(MainActivity.class);
 
     @Before //This is executed before the @Test executes
     public void setUp() {
