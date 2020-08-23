@@ -21,6 +21,7 @@ import android.view.ViewGroup;
 
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -41,9 +42,11 @@ import org.json.JSONObject;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.Buffer;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -79,7 +82,6 @@ public class Fragment_Tasks extends Fragment implements FeedbackDialog.FeedbackD
     Date startTime;
     int previousProgressColorOfSelected;
     int previousBackgroundColorOfSelected;
-    private long sessionStartTime;
 
     //for tf model
     public TextClassificationClient tf_classifytasks;
@@ -114,6 +116,9 @@ public class Fragment_Tasks extends Fragment implements FeedbackDialog.FeedbackD
     // past events queue
     private List<PastEvent> pastEventsList;
 
+    //daily history
+    private static final String DAILY_HISTORY_FILE_NAME = "daily-history";
+
     // mapping from each incomplete task reference to its respective list of data points
     private Map<String, List<Map<String, Object>>> dataPointsMap;
 
@@ -134,16 +139,6 @@ public class Fragment_Tasks extends Fragment implements FeedbackDialog.FeedbackD
         View view = inflater.inflate(R.layout.fragment_todolist, container, false);
         recyclerView = view.findViewById(R.id.todolist_tasks_recycler);
 
-        //set floating action button to open addTodo
-        fab = getActivity().findViewById(R.id.floatingActionButton);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                DialogFragment addTodo = new AddTask(tf_classifytasks);
-                addTodo.show(getChildFragmentManager(), "tag");
-            }
-        });
-
         this.pastEventsList = initialisePastEventsList();
         this.dataPointsMap = initialiseDataPointsMap();
 
@@ -158,42 +153,6 @@ public class Fragment_Tasks extends Fragment implements FeedbackDialog.FeedbackD
         saveData();
         super.onPause();
     }
-
-    private void triggerNotification(){
-        Intent intent = new Intent(getActivity(), MainActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(getActivity(), 0, intent, 0);
-
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(getActivity(), "CHANNEL_ID")
-                .setSmallIcon(R.drawable.ic_molecular)
-                .setContentTitle("ChemicAL X")
-                .setContentText("you have a task that needs to be completed!")
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-                .setContentIntent(pendingIntent)
-                .setAutoCancel(true);
-
-        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(getActivity());
-        // notificationId is a unique int for each notification that you must define
-        notificationManager.notify(1, builder.build());
-    }
-
-    private void createNotificationChannel() {
-        // Create the NotificationChannel, but only on API 26+ because
-        // the NotificationChannel class is new and not in the support library
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            CharSequence name = "chemical channel";
-            String description = "chemical channel desc";
-            int importance = NotificationManager.IMPORTANCE_DEFAULT;
-            NotificationChannel channel = new NotificationChannel("CHANNEL_ID", name, importance);
-            channel.setDescription(description);
-            channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
-            // Register the channel with the system; you can't change the importance
-            // or other notification behaviors after this
-            NotificationManager notificationManager = getActivity().getSystemService(NotificationManager.class);
-            notificationManager.createNotificationChannel(channel);
-        }
-    }
-
 
     public void addTask(TaskItemModel task) {
         switch (task.category) {
@@ -248,7 +207,7 @@ public class Fragment_Tasks extends Fragment implements FeedbackDialog.FeedbackD
         super.onViewCreated(rootView, savedInstanceState);
     }
 
-    public void selectTask(final TaskItemAdapter.TodoViewHolder holder, final TaskItemModel todoItemModel, int progressColor, int backgroundColor) {
+    public void selectTask(final TaskItemAdapter.TodoViewHolder holder, final TaskItemModel todoItemModel, int progressColor, int backgroundColor) throws IOException, JSONException {
         // if item was already selected, deselect
         if (todoItemModel == selectedTask) {
             deselectCurrentTask();
@@ -290,19 +249,28 @@ public class Fragment_Tasks extends Fragment implements FeedbackDialog.FeedbackD
                 .update("timePassed", selectedTask.timePassed);
     }
 
-    public void deselectCurrentTask() {
+    public void deselectCurrentTask() throws IOException, JSONException {
         //stop increasing timing
         timer.cancel();
 
         //get current task details to give to dialog
         HashMap<String, Object> currentTask = getCurrentTaskDetails();
+// * 60 * 5
+        // if the task is longer than 5 minutes
+        if ((long) currentTask.get("sessionDuration") > (1000L)) {
+            JSONObject newEntry = new JSONObject();
+            newEntry.put("title", selectedTask.title);
+            newEntry.put("startTime", currentTask.get("startTime"));
+            newEntry.put("endTime", currentTask.get("endTime"));
+            newEntry.put("category", currentTask.get("category"));
+            storeEntryInHistory(newEntry);
 
-        // Initialise Feedback Dialog
-        DialogFragment feedbackDialog = new FeedbackDialog(this, currentTask);
-        // You can get the FragmentManager by calling getSupportFragmentManager()
-        // from the FragmentActivity or getFragmentManager() from a Fragment.
-        feedbackDialog.show(getChildFragmentManager(), "feedback");
-
+            // Initialise Feedback Dialog
+            DialogFragment feedbackDialog = new FeedbackDialog(this, currentTask);
+            // You can get the FragmentManager by calling getSupportFragmentManager()
+            // from the FragmentActivity or getFragmentManager() from a Fragment.
+            feedbackDialog.show(getChildFragmentManager(), "feedback");
+        }
         //update firebase
         updateFirebase();
 
@@ -313,6 +281,53 @@ public class Fragment_Tasks extends Fragment implements FeedbackDialog.FeedbackD
         selectedTaskViewholder.cardView.setCardElevation(1);
         selectedTaskViewholder.progressBar.setProgressTintList(ColorStateList.valueOf(getContext().getResources().getColor(previousProgressColorOfSelected)));
         selectedTaskViewholder.progressBar.setProgressBackgroundTintList(ColorStateList.valueOf(getContext().getResources().getColor(previousBackgroundColorOfSelected)));
+    }
+
+    private void storeEntryInHistory(JSONObject newEntry) throws IOException, JSONException {
+        FileReader fileReader;
+        FileWriter fileWriter;
+        BufferedReader bufferedReader;
+        BufferedWriter bufferedWriter;
+        String response;
+        File file = new File(getActivity().getFilesDir(), DAILY_HISTORY_FILE_NAME);
+        if (!file.exists()){
+            try {
+                file.createNewFile();
+                fileWriter = new FileWriter(file.getAbsoluteFile());
+                bufferedWriter = new BufferedWriter(fileWriter);
+                bufferedWriter.write("{}");
+                bufferedWriter.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        StringBuffer output = new StringBuffer();
+        fileReader = new FileReader(file.getAbsolutePath());
+        bufferedReader = new BufferedReader(fileReader);
+
+        String line = "";
+        while ((line = bufferedReader.readLine()) != null){
+            output.append(line + "\n");
+        }
+
+        response = output.toString();
+        Log.d(TAG, response);
+        bufferedReader.close();
+        JSONObject messageDetails = new JSONObject(response);
+        Boolean isEntryExisting = messageDetails.has("entries");
+        if (!isEntryExisting){
+            JSONArray entries = new JSONArray();
+            entries.put(newEntry);
+            messageDetails.put("entries", entries);
+        } else {
+            JSONArray entries = (JSONArray) messageDetails.get("entries");
+            entries.put(newEntry);
+        }
+        fileWriter = new FileWriter(file.getAbsoluteFile());
+        BufferedWriter bw = new BufferedWriter(fileWriter);
+        Log.d(TAG, messageDetails.toString());
+        bw.write(messageDetails.toString());
+        bw.close();
     }
 
     public HashMap<String, Object> getCurrentTaskDetails() {
@@ -374,20 +389,6 @@ public class Fragment_Tasks extends Fragment implements FeedbackDialog.FeedbackD
                 .document(task.docID)
                 .delete();
 
-        //update user history
-        HashMap<String, Object> newhistory = new HashMap<>();
-        newhistory.put("docID", task.docID);
-        newhistory.put("category", task.category);
-        newhistory.put("timeFinished", new Timestamp(new Date()));
-        newhistory.put("timeRemaining", task.timePassed);
-        newhistory.put("totalTime", task.totalTime);
-        newhistory.put("completion", true);
-
-        FirebaseFirestore.getInstance().collection("users")
-                .document(FirebaseAuth.getInstance().getCurrentUser().getUid())
-                .collection("history")
-                .add(newhistory);
-
         // notify category adapter
         mAdapter.notifyChange(task.category);
     }
@@ -419,7 +420,7 @@ public class Fragment_Tasks extends Fragment implements FeedbackDialog.FeedbackD
         FileReader fileReader = new FileReader(pastEventsFile);
         BufferedReader bufferedReader = new BufferedReader(fileReader);
         String line = bufferedReader.readLine();
-        while (line != null){
+        while (line != null) {
             stringBuilder.append(line).append("\n");
             line = bufferedReader.readLine();
         }
@@ -470,7 +471,7 @@ public class Fragment_Tasks extends Fragment implements FeedbackDialog.FeedbackD
             // processing of values
             eventCategory = tf_classifytasks.classify(title);
 
-            switch(eventCategory) {
+            switch (eventCategory) {
                 case "Work":
                     eventCategoryIndex = 1;
                     break;
@@ -542,7 +543,7 @@ public class Fragment_Tasks extends Fragment implements FeedbackDialog.FeedbackD
             // processing of values
             eventCategory = tf_classifytasks.classify(title);
 
-            switch(eventCategory) {
+            switch (eventCategory) {
                 case "Work":
                     eventCategoryIndex = 1;
                     break;
@@ -590,7 +591,7 @@ public class Fragment_Tasks extends Fragment implements FeedbackDialog.FeedbackD
         long desiredDuration = (long) completedTaskSession.get("sessionDuration");
         double normalisedDesiredDuration = Math.tanh(Math.log(((double) desiredDuration) / 1000 / 60 / 60));
         String taskCategory = (String) completedTaskSession.get("category");
-        switch(taskCategory) {
+        switch (taskCategory) {
             case "Work":
                 taskCategoryIndex = 1;
                 break;
@@ -644,7 +645,7 @@ public class Fragment_Tasks extends Fragment implements FeedbackDialog.FeedbackD
     @Override
     public void onFeedbackClick(DialogFragment dialog, int which, HashMap<String, Object> currentTask) {
         double productivity;
-        switch(which) {
+        switch (which) {
             case 0:
                 productivity = PRODUCTIVITY_FACTOR;
                 break;
@@ -658,27 +659,6 @@ public class Fragment_Tasks extends Fragment implements FeedbackDialog.FeedbackD
 
         addCompletedTaskSessionAsDataPoint(currentTask, productivity);
         saveDataPointsMap();
-
-//        if (scheduleList == null){
-//            Toast.makeText(this, "error: feedback not saved", Toast.LENGTH_SHORT).show();
-//            return;
-//        }
-//        ArrayList<HashMap<String,Object>> schedule = new ArrayList<>();
-//        for (TimeLineModel tlm : scheduleList){
-//            HashMap<String,Object> tlm_ = new HashMap<>();
-//            tlm_.put("category", tlm.category);
-//            tlm_.put("timeStart", new Timestamp(new Date(tlm.dtstart)));
-//            tlm_.put("timeEnd", new Timestamp(new Date(tlm.dtend)));
-//            schedule.add(tlm_);
-//        }
-//        currentTask.put("schedule", schedule);
-//        // 0,1,2 corresponding to productive, average, and unproductive
-//        currentTask.put("productivity", which);
-//
-//        FirebaseFirestore.getInstance().collection("users")
-//                .document(FirebaseAuth.getInstance().getUid())
-//                .collection("history")
-//                .add(currentTask);
     }
 
     @Override
@@ -758,7 +738,7 @@ public class Fragment_Tasks extends Fragment implements FeedbackDialog.FeedbackD
         FileReader fileReader = new FileReader(dataPointsFile);
         BufferedReader bufferedReader = new BufferedReader(fileReader);
         String line = bufferedReader.readLine();
-        while (line != null){
+        while (line != null) {
             stringBuilder.append(line).append("\n");
             line = bufferedReader.readLine();
         }

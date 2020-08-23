@@ -28,28 +28,46 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
-import androidx.core.app.NotificationCompat;
-import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
+import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.chemicalx.Fragment_Tasks.AddTask;
 import com.example.chemicalx.Fragment_Tasks.TaskItemModel;
 import com.example.chemicalx.MainActivity;
 import com.example.chemicalx.R;
 import com.example.chemicalx.TextClassificationClient;
+import com.example.chemicalx.tasksuggester.AutoSuggestTasksService;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentChange;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.QuerySnapshot;
 
-import java.sql.Time;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.PriorityQueue;
 
 
 public class Fragment_Schedule extends Fragment {
@@ -84,7 +102,7 @@ public class Fragment_Schedule extends Fragment {
     // Projection arrays. Creating indices for these arrays instead of doing
     // dynamic lookups improves performance.
     // calendars
-    private static final String[] CALENDAR_PROJECTION = new String[] {
+    private static final String[] CALENDAR_PROJECTION = new String[]{
             CalendarContract.Calendars._ID,
             CalendarContract.Calendars.ACCOUNT_NAME,
             CalendarContract.Calendars.IS_PRIMARY
@@ -95,6 +113,9 @@ public class Fragment_Schedule extends Fragment {
             CalendarContract.Instances.BEGIN,
             CalendarContract.Instances.END
     };
+
+    //add events from history
+    private static final String DAILY_HISTORY_FILE_NAME = "daily-history";
 
     // The indices for the projection arrays above.
     // calendars
@@ -139,7 +160,13 @@ public class Fragment_Schedule extends Fragment {
         handleReadCalendarPermissionRequest();
 
         // modifies the layout according towhether READ_CALENDAR is granted
-        modifyLayoutAccordingToReadCalendarPermission();
+        try {
+            modifyLayoutAccordingToReadCalendarPermission();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
 
         return view;
     }
@@ -214,7 +241,7 @@ public class Fragment_Schedule extends Fragment {
             // temporary placeholder status for now
             if (now.getTimeInMillis() < dtstart) {
                 status = OrderStatus.INACTIVE;
-            } else if (now.getTimeInMillis() < dtend){
+            } else if (now.getTimeInMillis() < dtend) {
                 status = OrderStatus.ACTIVE;
             } else {
                 status = OrderStatus.COMPLETED;
@@ -240,7 +267,7 @@ public class Fragment_Schedule extends Fragment {
         timelineRecyclerView = view.findViewById(R.id.todolist_tasks_recycler);
     }
 
-    private void initReadCalendarGrantedLayout() {
+    private void initReadCalendarGrantedLayout() throws IOException, JSONException {
         initDateAndDayTextView();
         setDataListItems();
         initTimelineRecyclerView();
@@ -309,12 +336,16 @@ public class Fragment_Schedule extends Fragment {
         addEventButtonTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                AddEventDialogFragment addEventDialogFragment = new AddEventDialogFragment(
-                        Fragment_Schedule.this, queryCalendarID());
-                addEventDialogFragment.show(getParentFragmentManager(),
-                        "Add Event Dialog Fragment");
+                addEvent();
             }
         });
+    }
+
+    public void addEvent() {
+        AddEventDialogFragment addEventDialogFragment = new AddEventDialogFragment(
+                Fragment_Schedule.this, queryCalendarID());
+        addEventDialogFragment.show(getParentFragmentManager(),
+                "Add Event Dialog Fragment");
     }
 
     private void initDeleteEventsButton() {
@@ -339,7 +370,7 @@ public class Fragment_Schedule extends Fragment {
         String selection = "((" + CalendarContract.Calendars.ACCOUNT_NAME + " = ?) AND ("
                 + CalendarContract.Calendars.IS_PRIMARY + " = 1))";
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        String[] selectionArgs = new String[] { user.getEmail() };
+        String[] selectionArgs = new String[]{user.getEmail()};
         // Submit the query and get a Cursor object back.
         @SuppressLint("MissingPermission")
         Cursor cur = cr.query(uri, CALENDAR_PROJECTION, selection, selectionArgs, null);
@@ -385,7 +416,7 @@ public class Fragment_Schedule extends Fragment {
         }
     }
 
-    private void modifyLayoutAccordingToReadCalendarPermission() {
+    private void modifyLayoutAccordingToReadCalendarPermission() throws IOException, JSONException {
         if (isReadCalendarGranted) {
             // change the appearance to the READ_CALENDAR permission granted layout
             readCalendarDeniedLayout.setVisibility(View.GONE);
@@ -403,41 +434,82 @@ public class Fragment_Schedule extends Fragment {
         }
     }
 
-    public void addTasks() {
-        List<TaskItemModel> tasks = ((MainActivity)getActivity()).tasks;
-//        if (tasks.size() > 0){
-//            // TODO replace with AI
-//            tasks_added = true;
-//        }
+    public void addTasks() throws IOException, JSONException {
+        Log.d(TAG, "adding tasks to the schedule now");
+        ArrayList<TimeLineModel> toBeAdded = new ArrayList<>();
 
-        long one_hour = 60 * 60 *1000;
-        TimeLineModel timeLineModel;
-        List<TimeLineModel> toBeAdded = new ArrayList<>();
+        FileReader fileReader;
+        FileWriter fileWriter;
+        BufferedReader bufferedReader;
+        BufferedWriter bufferedWriter;
+        String response;
+        File file = new File(getActivity().getFilesDir(), DAILY_HISTORY_FILE_NAME);
+        if (!file.exists()) {
+            return;
+        }
+        StringBuffer output = new StringBuffer();
+        fileReader = new FileReader(file.getAbsolutePath());
+        bufferedReader = new BufferedReader(fileReader);
 
-        // the exact moment right now
-        Calendar now = Calendar.getInstance();
+        String line = "";
+        while ((line = bufferedReader.readLine()) != null) {
+            output.append(line + "\n");
+        }
 
-        for (int i=0; i<mDataList.size()-1; i++){
-            TimeLineModel currentItem = mDataList.get(i);
-            TimeLineModel nextItem = mDataList.get(i+1);
-            // if we havent passed the event and theres a short gap between 2 events, add a task
-            // this is a temporary condition, replaced by our AI stuff when we finish it.
-            boolean eventNotOver = now.getTimeInMillis() < currentItem.dtend;
-            boolean taskQueueSizeSufficient = tasks.size() > 0;
-            Log.d(nextItem.dtstart -currentItem.dtend + "", currentItem.dtend+ "");
-            boolean atLeast1Hour = nextItem.dtstart - currentItem.dtend >= one_hour;
-            boolean atMost8Hours = nextItem.dtstart - currentItem.dtend <= one_hour*8;
-            Log.d(currentItem.message, eventNotOver + " " + taskQueueSizeSufficient + " " + atLeast1Hour + " " + atMost8Hours);
-            if (eventNotOver && taskQueueSizeSufficient && atLeast1Hour && atMost8Hours){
-                TaskItemModel t = tasks.get(0);
-                timeLineModel = new TimeLineModel(t.getTitle(), mDataList.get(i).dtend, mDataList.get(i+1).dtstart, OrderStatus.INACTIVE, t.getCategory(), true);
-                toBeAdded.add(timeLineModel);
+        response = output.toString();
+        Log.d(TAG, response);
+        bufferedReader.close();
+        JSONObject messageDetails = new JSONObject(response);
+        Boolean isEntryExisting = messageDetails.has("entries");
+        if (!isEntryExisting) {
+            return;
+        }
+        JSONArray entries = (JSONArray) messageDetails.get("entries");
+        for (int i = 0; i < entries.length(); i++) {
+            JSONObject entry;
+            String title = "";
+            String category = "";
+            long startTime = 0;
+            long endTime = 0;
+            boolean isFromTasks = true;
+            try{
+                entry = entries.getJSONObject(i);
+                title = entry.getString("title");
+                category = entry.getString("category");
+                startTime = entry.getLong("startTime");
+                endTime = entry.getLong("endTime");
+            } catch (JSONException e) { // if theres any error, delete the document
+                file.createNewFile();
+                fileWriter = new FileWriter(file.getAbsoluteFile());
+                bufferedWriter = new BufferedWriter(fileWriter);
+                bufferedWriter.write("{}");
+                bufferedWriter.close();
+                e.printStackTrace();
+                return;
             }
 
-            if (toBeAdded.size() > 0){
-                // schedule notification for the next and only next task
-                triggerNotification(toBeAdded.get(0).message, toBeAdded.get(0).dtstart);
+            Calendar startDate = Calendar.getInstance();
+            startDate.setTimeInMillis(startTime);
+            Calendar endDate = Calendar.getInstance();
+            startDate.setTimeInMillis(endTime);
+
+            // if we are no longer on the same day, delete the document.
+            if (startDate.get(Calendar.DATE) != endDate.get(Calendar.DATE)) {
+                try {
+                    file.createNewFile();
+                    fileWriter = new FileWriter(file.getAbsoluteFile());
+                    bufferedWriter = new BufferedWriter(fileWriter);
+                    bufferedWriter.write("{}");
+                    bufferedWriter.close();
+                    return;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
+            // else make a timeline model
+            TimeLineModel tlm = new TimeLineModel(title, startTime, endTime,
+                    OrderStatus.COMPLETED, category, true); // isFromTasks set to true
+            toBeAdded.add(tlm);
         }
         mDataList.addAll(toBeAdded);
         mDataList.sort(null);
@@ -463,17 +535,6 @@ public class Fragment_Schedule extends Fragment {
     public void updateTimelineRecyclerView() {
         setDataListItems();
         mAdapter.notifyDataSetChanged();
-    }
-
-    private void triggerNotification(String task, long time){
-        Log.d("TRIGGER NOTIF", " HEAR HEAR");
-        Intent intent = new Intent(getActivity(), ScheduleBroadcastReceiver.class);
-        intent.putExtra("task", task);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(getActivity(), 0, intent, 0);
-
-        AlarmManager alarmManager = (AlarmManager) getActivity().getSystemService(Context.ALARM_SERVICE);
-        alarmManager.set(AlarmManager.RTC_WAKEUP, time, pendingIntent);
-        Log.d("TRIGGER NOTIF", time + "");
     }
 
     private void createNotificationChannel() {

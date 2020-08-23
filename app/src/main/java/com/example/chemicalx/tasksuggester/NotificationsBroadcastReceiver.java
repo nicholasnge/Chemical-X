@@ -1,4 +1,4 @@
-package com.example.chemicalx.Fragment_Schedule;
+package com.example.chemicalx.tasksuggester;
 
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
@@ -12,17 +12,24 @@ import androidx.core.app.NotificationManagerCompat;
 import com.example.chemicalx.MainActivity;
 import com.example.chemicalx.R;
 
-public class ScheduleBroadcastReceiver extends BroadcastReceiver {
+public class NotificationsBroadcastReceiver extends BroadcastReceiver {
+    public final static String TAG = "ScheduleBroadcastReceiver";
+
     @Override
     public void onReceive(Context context, Intent intent) {
-        Log.d("SCHEDULE BROADCAST", " HEAR HEAR");
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
         String task = intent.getStringExtra("task");
+        long duration = intent.getLongExtra("duration", 60);
+
+        // sometimes intents are double sent, dunno why. so this is a plaster to deny the erroneous intents
+        if (task == null){
+            return;
+        }
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, "SCHEDULE_CHANNEL")
                 .setSmallIcon(R.drawable.ic_molecular)
-                .setContentTitle(task)
-                .setContentText("Try working on this task now if you have the time!")
+                .setContentTitle("Task Suggestion")
+                .setContentText(task + " for " + duration + " minutes")
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setContentIntent(pendingIntent)
