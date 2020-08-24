@@ -1,14 +1,18 @@
 package com.example.chemicalx;
 
 import android.Manifest;
+import android.app.AlarmManager;
 import android.app.AppOpsManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -17,11 +21,13 @@ import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
+import androidx.preference.PreferenceManager;
 import androidx.viewpager.widget.ViewPager;
 
 import java.util.ArrayList;
@@ -31,9 +37,12 @@ import java.util.List;
 import com.example.chemicalx.Fragment_Schedule.Fragment_Schedule;
 import com.example.chemicalx.Fragment_Schedule.ReadCalendarPermissionDialogFragment;
 import com.example.chemicalx.Fragment_Insights.Fragment_Insights;
+import com.example.chemicalx.Fragment_Tasks.AddTask;
 import com.example.chemicalx.Fragment_Tasks.Fragment_Tasks;
 import com.example.chemicalx.Fragment_Tasks.TaskItemModel;
 import com.example.chemicalx.settings.SettingsActivity;
+import com.example.chemicalx.tasksuggester.AutoSuggestTasksBroadcastReceiver;
+import com.example.chemicalx.tasksuggester.AutoSuggestTasksService;
 import com.example.chemicalx.tasksuggester.RequestTaskSuggestionDialogFragment;
 import com.example.chemicalx.tasksuggester.TaskSuggester;
 import com.example.chemicalx.tasksuggester.TaskSuggestionResultDialogFragment;
@@ -45,6 +54,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.auth.FirebaseAuth;
@@ -82,6 +92,9 @@ public class MainActivity extends AppCompatActivity
 
     // for tf model
     public TextClassificationClient tf_classifytasks;
+
+    //autosuggest tasks
+    boolean finishedSuggestingTasks = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -128,6 +141,24 @@ public class MainActivity extends AppCompatActivity
         if (mode != AppOpsManager.MODE_ALLOWED) {
             startActivityForResult(new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS), APPUSAGE_REQUEST_CODE);
         }
+
+        //set floating action button to open addTodo
+        FloatingActionButton fab = findViewById(R.id.floatingActionButton);
+        fab.setBackgroundColor(ContextCompat.getColor(this, R.color.colorPrimary));
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Fragment currentActive = getSupportFragmentManager().findFragmentByTag("android:switcher:" + R.id.viewpager + ":" + viewPager.getCurrentItem());
+                // based on the current position you can then cast the page to the correct
+                // class and call the method:
+                if (viewPager.getCurrentItem() == 0 && currentActive != null) {
+                    ((Fragment_Schedule) currentActive).addEvent();
+                } else {
+                    DialogFragment addTodo = new AddTask(tf_classifytasks);
+                    addTodo.show(getSupportFragmentManager(), TAG);
+                }
+            }
+        });
     }
 
     private void startLoginActivity() {
@@ -158,6 +189,11 @@ public class MainActivity extends AppCompatActivity
             userDisplay.setText(personName);
             userContactDisplay.setText(personEmail);
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        moveTaskToBack(true);
     }
 
     @Override
@@ -201,6 +237,10 @@ public class MainActivity extends AppCompatActivity
                         new RequestTaskSuggestionDialogFragment(this);
                 requestTaskSuggestionDialogFragment.show(getSupportFragmentManager(),
                         "Request Task Suggestion Dialog Fragment");
+                break;
+            case R.id.addTask:
+                FloatingActionButton fab = findViewById(R.id.floatingActionButton);
+                fab.callOnClick();
                 break;
             default:
         }
@@ -364,10 +404,11 @@ public class MainActivity extends AppCompatActivity
                                     task_fragment.addTask(task);
                                 }
                             }
-                            // after retrieving tasks, add them schedule if havent done so.
-                            // there are two callers of addTasks(). MainActivity after retrieving tasks (here) or FragmentSchedule after being created
-                            // todo replace with AI stuff
-                            schedule_fragment.addTasks();
+                            //after retrievin tasks, suggest them if haven't
+                            if (!finishedSuggestingTasks){
+                                autosuggestTasks(tasks);
+                                finishedSuggestingTasks = true;
+                            }
                         }
                     }
 
@@ -395,6 +436,42 @@ public class MainActivity extends AppCompatActivity
         }
         taskSuggestionResultDialogFragment.show(getSupportFragmentManager(),
                 "Task Suggestion Result Dialog Fragment");
+    }
+
+    public void autosuggestTasks(ArrayList<TaskItemModel> tasks) {
+        SharedPreferences sharedPreferences =
+                PreferenceManager.getDefaultSharedPreferences(this /* Activity context */);
+        Boolean enable_autosuggest_tasks = sharedPreferences.getBoolean("enable_autosuggest_tasks", true);
+
+        Log.d(TAG, "autosuggest tasks: " + enable_autosuggest_tasks);
+        if (enable_autosuggest_tasks) {
+            setAutosuggestAlarm();
+        }
+    }
+
+    private void setAutosuggestAlarm() {
+        // Set the alarm to start at approximately 9:00 a.m.
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.HOUR_OF_DAY, 9);
+
+        Intent intent = new Intent(this, AutoSuggestTasksBroadcastReceiver.class);
+        Bundle bundle = new Bundle();
+        bundle.putParcelableArrayList("tasks", tasks);
+        intent.putExtra("bundle",bundle);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 1, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        // With setInexactRepeating(), you have to use one of the AlarmManager interval
+// constants--in this case, AlarmManager.INTERVAL_DAY.
+//        alarmMgr.setInexactRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(),
+//                AlarmManager.INTERVAL_DAY, pendingIntent);
+        AlarmManager alarmMgr = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        alarmMgr.set(AlarmManager.RTC_WAKEUP,calendar.getTimeInMillis(),pendingIntent);
+        Log.d(TAG, "auto suggesting tasks");
+
+        //if not yet 9pm, also start suggesting now
+//        if (Calendar.getInstance().HOUR_OF_DAY < 21){
+//            sendBroadcast(intent);
+//        }
     }
 }
 

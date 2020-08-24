@@ -32,7 +32,13 @@
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name" />
-        <receiver android:name=".Fragment_Schedule.ScheduleBroadcastReceiver"/>
+
+        <receiver android:name=".tasksuggester.NotificationsBroadcastReceiver" />
+        <receiver android:name=".tasksuggester.AutoSuggestTasksBroadcastReceiver" />
+
+        <service
+            android:name=".tasksuggester.AutoSuggestTasksService"
+            android:exported="false" />
     </application>
 
 </manifest>

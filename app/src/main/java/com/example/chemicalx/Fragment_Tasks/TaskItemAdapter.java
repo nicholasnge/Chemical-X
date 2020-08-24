@@ -14,6 +14,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.chemicalx.R;
 
+import org.json.JSONException;
+
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class TaskItemAdapter extends RecyclerView.Adapter<TaskItemAdapter.TodoViewHolder> {
@@ -49,7 +52,13 @@ public class TaskItemAdapter extends RecyclerView.Adapter<TaskItemAdapter.TodoVi
         holder.cardView.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
-                fragment_tasks.selectTask(holder, todoItemModel, progressColor, backgroundColor);
+                try {
+                    fragment_tasks.selectTask(holder, todoItemModel, progressColor, backgroundColor);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
         });
         holder.button.setOnClickListener(new View.OnClickListener() {

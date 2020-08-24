@@ -19,6 +19,8 @@ package com.example.chemicalx;
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.util.Log;
 import androidx.annotation.WorkerThread;
 import java.io.BufferedReader;

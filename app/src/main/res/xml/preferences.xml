@@ -10,6 +10,13 @@
             android:title="Enable Notifications"
             android:defaultValue="true"/>
 
+        <SwitchPreferenceCompat
+            android:key="enable_autosuggest_tasks"
+            android:title="Auto-suggest tasks"
+            android:defaultValue="true"
+            android:summary="Chemical X will automatically suggest tasks to you when you are free"
+            />
+
     </PreferenceCategory>
 
     <PreferenceCategory
